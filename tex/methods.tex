@@ -1,0 +1,54 @@
+%# -*- coding: utf-8-unix -*-
+\chapter{Method}
+In this section, we will describe the concrete methods proposed in this paper. Since we did experiments mainly in image classification datasets, we will illustrate our method mainly by the example of image classification. However, readers should note that our method can be easily extended to other machine learning problems like object detection and segmentation.
+
+First, we will introduce the transformation we introduced to the final fully connected layer of the convolutional neural network to handle the case when a new class is added. To the best of our knowledge, we are the first to introduce this transformation. Based on this, we first introduce some baseline methods to perform class incremental learning that we compared to in the experiments. Then, we introduced our algorithm based on hard negative mining in detail.
+
+\section{Network Transformation for Increasing a Class}
+
+Under the class-incremental learning setting, we assume at some moment we have a training set $\mathbb{X}$, composed of $\mathbb{N}$ images $\mathbf{x_i} \in R^D$, each belonging to a category $y_i$. Here $i = 1 ...\mathbb{N}$ and $y_i \in 1 ... N$. The image dimension is denoted by $D$. For example, a $32\times32$ pixel RGB image would have $D=32\times32\times3$ dimensions. At this moment, there are $N$ distinct categories. We have also a trained model deep convolutional neural network, and we denote the neural network with the function $\Phi(\mathbf{x_i}; \mathbf{W}, \mathbf{b})$, where the weights and bias of the neural network are denoted by $\mathbf{W}$ and $\mathbf{b}$ respectively. For simplicity, we omit the vector $\mathbf{b}$ and assume that $\mathbf{b}$ is covered by $\mathbf{W}$. Thus the deep convolutional neural network can be represented by $\Phi(\mathbf{x_i}; \mathbf{W})$. $\Phi(\mathbf{x_i}; \mathbf{W})$ will take an image $x_i$ as input, and outputs the probability scores for each class $P_i(\mathbf{Y_i}|\mathbf{x_i};\mathbf{W})\in [0,1]$, where $j = 1 ... N$. We use $Y_i$ to denote the class variable for image $\mathbf{x_i}$, and in this case $Y_i =1...N$.  Note that the probability scores sum to one, i.e., $\sum_{Y_i} P_i(Y_i|\mathbf{x_i};\mathbf{W}) = 1$.
+
+The final layer of a deep convolutional neural network $\Phi(\mathbf{x_i}; W)$ for classification is usually a fully-connected layer, and can also be interpreted as a linear layer. We denote the output vector before the fully connected layer, i.e., the input vector to the fully connected layer as $\mathbf{O}$, which is a $1 \times X$ vector. Then the fully connected layer can be formulated as:
+\begin{align}
+f(\mathbf{O}; \mathbf{W_f}, \mathbf{b_f}) =  \mathbf{W_f}\mathbf{O} + \mathbf{b_f}
+\end{align}
+
+The probability scores are directly produced by the outputs of last layer of the neural network, i.e., the softmax layer:
+\begin{align}
+P_i(Y_i|\mathbf{x_i};\mathbf{W}) = \frac{e^{f_{Y_i}}}{\sum_j e^{f_j}}
+\end{align}, where $f_j$ means the $j$th element of the class scores vector.
+
+Then, we assume at some moment a new class of data arrives. We denote the new set of images as $\hat{\mathbb{X}}$, consisting of $\hat{\mathbb{N}}$ images $\hat{x_i} \in R^D$, each belonging to a category $\hat{y_i}$. Under the definition of class-incremental learning and the real use case, we are sure this time that all new data belongs to the same new class, and we denote the new class as $N+1$. Hence $\forall \hat{y_i}$, $\hat{y_i}=N+1$. At this time, there will be $N+1$ distinct categories in total. 
+
+Correspondingly, to keep the deep convolutional neural network $\Phi(x_i; W)$ cater to the new situation, we have to do some minimal modifications to the final fully-connected layer and the output layer of the network, to enable it to output probability scores for $N+1$ classes. Note that the modifications described below is different from the network evolving methods described in Related Works section. We only do the minimal modifications to the network output layer to make it eligible for the additional class. We added some weights to make the output size change possible but did not change the network structure, and the added weights are inevitable. But other network evolving papers added much more parameters and complex structures to the original network than just modifying the output layer.
+
+The modifications to the output layer can be formalized as follows. The weights of the layers before the fully connected layer remains unchanged. This indicates that the output vector before the fully connected layer, i.e., the input vector to the fully connected layer is still denoted as $\mathbf{O}$, which is unchanged. Then the fully connected layer is modified as:
+\begin{align}
+f(\mathbf{O}; \hat{\mathbf{W_f}}, \hat{\mathbf{b_f}}) =  \hat{\mathbf{W_f}}\mathbf{O} + \hat{\mathbf{b_f}}
+\end{align}
+We construct the new weights and bias $\hat{\mathbf{W_f}}$ and $\hat{\mathbf{b_f}}$ as follows:
+%这里可以放张示意图
+\begin{align}
+\left\{
+	\begin{aligned}
+	\hat{\mathbf{W_{f_{x,y}}}} & = & \mathbf{W_{f_{x,y}}}& ,& y = 1...N\\
+	\hat{\mathbf{W_{f_{x,y}}}} & = & 0&,& y = N+1	
+	\end{aligned}
+\right.
+\end{align}
+\begin{align}
+\left\{
+\begin{aligned}
+\hat{\mathbf{b_{f_{y}}}} & = & \mathbf{b_{f_{y}}}& ,& y = 1...N\\
+\hat{\mathbf{b_{f_{y}}}} & = & 0&,& y = N+1	
+\end{aligned}
+\right.
+\end{align}
+We can also randomly initialize the added weights according to the neural networks' weight initialization convention, but the results differ little since they affect little on its gradients.
+
+After this transformation, the output of the final fully connected layer $f(\mathbf{O}; \hat{\mathbf{W_f}}, \hat{\mathbf{b_f}})$ would be a $1\times (N+1)$ vector. After passing the vector to the softmax function, we are able to obtain class confidence scores for the $N+1$ classes.
+
+
+\section{Baselines}
+
+
