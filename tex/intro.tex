@@ -162,7 +162,7 @@ It is often claimed that the area of Neural Networks was originally inspired by 
 Based on the single neuron, we are able to stack many of them to form a multi-layer neural network, as illustrated in Fig.~\ref{fig:nn}.
 \begin{figure}[!htp]
 	\centering
-	\includegraphics[width=14cm]{nn.png}
+	\includegraphics[width=9cm]{nn.png}
 	\bicaption[Illustration of Neural Network]
 	{多层神经网络示意图}
 	{An example of multi-layer neural network. Figure borrowed from \cite{lecun2015deep}}
@@ -189,7 +189,70 @@ This paper will be mainly using convolutional neural networks for image recognit
 The history and development of deep neural networks, especially for computer vision, has been elaborated in the related work section. In this section, we will introduce several networks in more detail about their architectures, since they are used in the experiments.
 
 \subsection{ResNet}
+Deep residual networks\cite{he2016deep}(ResNet) are proposed by Kaiming He in 2015. Before the emergence of deep residual networks, the deepest public network, i.e., the VGGNet, has no more than 40 layers. The introduction of Batch Normalization enabled easier training of deeper networks, but there are only minor improvements in depth. Residual networks completely changed this situation and pushed the barrier of deep networks into more than one hundred layers. 
+\begin{figure}[!htp]
+	\centering
+	\includegraphics[width=8cm]{resnet.png}
+	\bicaption[Illustration of Residual Blocks]
+	{残差结构示意图}
+	{Illustration of Residual Blocks. Figure borrowed from \cite{he2016deep}.}
+	\label{fig:resnet}
+\end{figure}
+
+As shown in Fig.~\ref{fig:resnet}, residual networks are based upon residual blocks. In each of the block, a shortcut connection connected the previous layer and the next layer, and adds directly the result. Using this kind of block, one can easily imagine, increasing depth will at least not let the accuracy become worse, because the worst case is to learn an identity mapping. Without the residual connections, the convolutional layer is very hard to learn identity function. Therefore, deeper network become really hard to train. That is the reason why accuracy strangely becomes lower when the network grows deeper. 
+
+There are mainly two views on the most important reason why residual networks are able to learn such deep representations and improve the performance.
+\begin{itemize}
+	\item The first view is that the identity mappings are the major reason. Since we initialized the network to be near to identity, the accuracy is very unlikely to drop. This reason is also revealed in the paper.
+	\item A second view thinks the most important reason is that the residual connections pass the gradients more smoothly, so that the network becomes much easier to learn.
+\end{itemize}
+There are debates on which of these two views are correct. A paper on Arxiv once claimed that identity mappings are not important because other identity mapping functions are not able to bring about the same good result. Till now, the debate continues, but most experts would like to wait for mathematical proofs regarding deep neural networks, rather than debating and guessing empirically. 
+
+Deep residual networks brought a storm in the field of machine learning. Although it is initially developed for image classification, it is also able to greatly boost the performance of other computer vision tasks such as object detection and segmentation when substituting the base network with deep residual networks in their algorithm. What's more, the same heuristics is quite generic and it is quickly successfully applied to other areas like natural language processing. For example, when people use the same residual connection techniques on Long Term Short Memory model, it also greatly boosted the performance on natural language processing.
+\begin{figure}[!htp]
+	\centering
+	\includegraphics[width=4cm]{resnetv2.png}
+	\bicaption[Illustration of Pre-activation Residual Blocks]
+	{预激活残差结构示意图}
+	{Illustration of Pre-activation Residual Blocks. Figure borrowed from \cite{he2016identity}.}
+	\label{fig:resnetv2}
+\end{figure}
+One year later, the same authors published another paper\cite{he2016identity} and discussed different structures of residual blocks. They improved the residual block of the original paper, and the best residual block is shown in Fig.~\ref{fig:resnetv2}, called the pre-activation structure. Using the better residual block, they are able to train a network much more deeper, up to one thousand two hundred and two layers. They are the first to design a network that operates on more than one thousand layer while also improving accuracy. This version of deep residual network is also called ResNet V2 in literature. 
+
+However, later comments reveal that ResNet V2 actually does not have such significant improvements than ResNet V1. The accuracy difference between them is often very little. Moreover, for some network structures, it would even be better to use ResNet V1. For example, the later network variant ResNext, followed the basic outline of ResNet V1 and achieved state-of-the-art accuracy during the time it was made public.
+
 \subsection{DenseNet}
+\begin{figure}[!htp]
+	\centering
+	\includegraphics[width=16cm]{densenet.png}
+	\bicaption[Illustration of DenseNet]
+	{密集链接网络示意图}
+	{Illustration of DenseNet. Figure borrowed from \cite{huang2017densely}.}
+	\label{fig:densenet}
+\end{figure}
+Densely Connected Convolutional Networks\cite{huang2017densely} are called DenseNet. A basic block is illustrated in Fig.~\ref{fig:densenet}. It received the CVPR 2016 best paper award, because its novel architecture and further improved the image classification performance of deep residual networks.
+
+To begin with, Densely Connected Convolutional Networks has the following to major difference compared to deep residual networks:
+\begin{itemize}
+	\item The skip connections has become much denser. They added every possible connection to the current layer. Since it is much denser, the authors name it DenseNet. It is worth noting that the Densely Connected Convolutional Networks is divided into different stages, so the dense connections actually take place only within each stage. If the connections take place on the whole network, the network would be too complicated to calculate or fit in memory. And the feature map size is different, thus restricting the dense connections only in the same stage.
+	\item The operation to perform is changed to concatenation rather than summation. This change is quite match to common logic, because with such dense connections, it will become problematic to add all the values from previous layers. By concatenation, one would expect that the feature map dimensions of the later layers to become very large. The authors ameliorate this problem by two means: reduce the natural dimensions of layers so that the number of dimensions is small in the beginning, and add additional layers between stages to map the high dimension feature maps to lower dimensions.
+\end{itemize}
+
+Densely Connected Convolutional Networks achieved impressive results on image classification. Besides providing even better flow of gradients to deeper layers, the authors anticipate that by dense connections, the mathematical plane learned by the deep network become more smooth. In this way, the network is easier to find better local optima, and inherently holds some regularization properties.
+
+However, there are also critics that the Densely Connected Convolutional Networks do not perform well when working as a base model when pretrained and used in other tasks like object detection and segmentation. Nowadays, the major view of Densely Connected Convolutional Networks is that its transfer ability is quite weak as a pre-trained feature extractor. A possible reason is that the effective feature map dimensions are so shallow that higher-level general features become very hard to learn. But Densely Connected Convolutional Networks perform well when we try to train a object detection or segmentation base network directly based on the detection or segmentation data, perhaps because of ease of training.
+
 \subsection{ResNeXt}
 
+ResNext is a state-of-the-art convolutional network in 2017\cite{xie2017aggregated}. When combined with Squeeze-and-Excite blocks, it is still the current state-of-the-art network architecture.
+\begin{figure}[!htp]
+	\centering
+	\includegraphics[width=8cm]{resnext.png}
+	\bicaption[Illustration of ResNeXt blocks]
+	{聚合变换残差网络示意图}
+	{Illustration of ResNeXt blocks. Figure borrowed from \cite{xie2017aggregated}.}
+	\label{fig:resnext}
+\end{figure}
+Although stated very complicated in the paper, ResNeXt can be simply explained as ResNet combined with group convolution. A group convolution is illustrated in Fig.~\ref{fig:resnext}.  A normal convolution takes all previous feature map dimensions into calculation for every neuron. But in group convolution, feature map dimensions are divided equally into groups. The convolution layer can also be seen as operates on different groups and finally the results of different groups are concatenated together along the dimension.
 
+Group convolution was first used in AlexNet, in order to fit the network in two GPUs. No earlier work has observed that group convolution is able to boost the network performance. In fact many people have tried it, but the performance might be hard to tune. An important property of group convolutions is that it saves computation and parameters by the group number constant. By making heavy use of group convolution, ResNext is able to become much deeper and wider. In such a way, the network capacity becomes huge.

@@ -20,7 +20,7 @@ P_i(Y_i|\mathbf{x_i};\mathbf{W}) = \frac{e^{f_{Y_i}}}{\sum_j e^{f_j}}
 
 Then, we assume at some moment a new class of data arrives. We denote the new set of images as $\hat{\mathbb{X}}$, consisting of $\hat{\mathbb{N}}$ images $\hat{x_i} \in R^D$, each belonging to a category $\hat{y_i}$. Under the definition of class-incremental learning and the real use case, we are sure this time that all new data belongs to the same new class, and we denote the new class as $N+1$. Hence $\forall \hat{y_i}$, $\hat{y_i}=N+1$. At this time, there will be $N+1$ distinct categories in total. 
 
-Correspondingly, to keep the deep convolutional neural network $\Phi(x_i; W)$ cater to the new situation, we have to do some minimal modifications to the final fully-connected layer and the output layer of the network, to enable it to output probability scores for $N+1$ classes. Note that the modifications described below is different from the network evolving methods described in Related Works section. We only do the minimal modifications to the network output layer to make it eligible for the additional class. We added some weights to make the output size change possible but did not change the network structure, and the added weights are inevitable. But other network evolving papers added much more parameters and complex structures to the original network than just modifying the output layer.
+Correspondingly, to keep the deep convolutional neural network $\Phi(x_i; \mathbf{W})$ cater to the new situation, we have to do some minimal modifications to the final fully-connected layer and the output layer of the network, to enable it to output probability scores for $N+1$ classes. Note that the modifications described below is different from the network evolving methods described in Related Works section. We only do the minimal modifications to the network output layer to make it eligible for the additional class. We added some weights to make the output size change possible but did not change the network structure, and the added weights are inevitable. But other network evolving papers added much more parameters and complex structures to the original network than just modifying the output layer.
 
 The modifications to the output layer can be formalized as follows. The weights of the layers before the fully connected layer remains unchanged. This indicates that the output vector before the fully connected layer, i.e., the input vector to the fully connected layer is still denoted as $\mathbf{O}$, which is unchanged. Then the fully connected layer is modified as:
 \begin{align}
@@ -46,9 +46,56 @@ We construct the new weights and bias $\hat{\mathbf{W_f}}$ and $\hat{\mathbf{b_f
 \end{align}
 We can also randomly initialize the added weights according to the neural networks' weight initialization convention, but the results differ little since they affect little on its gradients.
 
-After this transformation, the output of the final fully connected layer $f(\mathbf{O}; \hat{\mathbf{W_f}}, \hat{\mathbf{b_f}})$ would be a $1\times (N+1)$ vector. After passing the vector to the softmax function, we are able to obtain class confidence scores for the $N+1$ classes.
+After this transformation, the output of the final fully connected layer $f(\mathbf{O}; \hat{\mathbf{W_f}}, \hat{\mathbf{b_f}})$ would be a $1\times (N+1)$ vector. After passing the vector to the softmax function, we are able to obtain class confidence scores for the $N+1$ classes. Let us denote the deep convolutional network after this transformation as $\Phi(x_i; \hat{\mathbf{W}})$, by substituting the parameters $\mathbf{W}$ with $\hat{\mathbf{W}}$.
 
 
-\section{Baselines}
+\section{A Straightforward Method}
+
+Utilizing the transformation method introduced in the previous section, we are ready to develop methods to train the newly added parameters, as well as continue training the trained parameters of the network. Following the common practice of training deep neural networks, we will use Stochastic Gradient Descent\cite{he2015deep} (SGD) with momentum\cite{sutskever2013importance} as the default optimization algorithm to train the network.
+
+Let us first define the accuracy upper bound, which is the accuracy when the parameters $\mathbf{W}$ of deep convolutional network $\Phi(\mathbf{x_i}; \mathbf{W})$ is trained from scratch using the training set $\mathbb{X}\cup \hat{\mathbb{X}}$. It is clear that to obtain this upper bound, lots of training time would be needed. Since all data is used to train the network from scratch, the network will be able to learn more globally optimal and discriminative features to distinguish all $N+1$ class. The time and computation needed to obtain this accuracy upper bound would also be the upper bound of the cost of time and computation. Here, since more computation leads to longer time, we will use the terms computation and time interchangably. Because since it is impossible for other methods to improve the accuracy, the other methods with longer training time will have no meaning of existence compared to this method. The aim of our algorithm, would be to find methods that lie inside the computation upper bound, while maintaining a relatively high accuracy compared to the accuracy upper bound.
+
+Considering this problem, a straightforward intuition is to use the training set data $\mathbb{X}$ as few as possible, since the current deep CNN can already classify the classes $1...N$. We can interpret this intuition as the knowledge of classifying classes $1...N$ is already captured by the current deep network $\Phi(\mathbf{x_i}; \mathbf{W})$. We hope the new network based on $\Phi(\mathbf{x_i}; \mathbf{W})$ can quickly learn additional knowledge to distinguish class $N+1$. 
+
+Following the intuition, let us consider an extreme case. We will only use the new data, $\hat{\mathbb{X}}$ to further train the network $\Phi(x_i; \hat{\mathbf{W}})$. By only using the new data, we can save lots of computation, because on average the training set size would only be $\frac{1}{N+1}$ of the whole training set $\mathbb{X}\cup \hat{\mathbb{X}}$. Implementing this idea, the result is that the accuracy for the $N+1$ class will quickly rush to $100\%$, while the accuracy for classes $1...N$ will become $0$. This phenomenon can be explained in this way: Since the network can only see the class $N+1$, the loss would be completely biased towards the class $N+1$. Then, the gradients will quickly let the network output very high confidence on class $N+1$, and very low confidence on classes $1...N$. The gap between those confidence will become worse and worse as we train more and more epochs, because there is only training data for class $N+1$. Thus, we should discard this extreme method since it does not work at all.
+
+However, the extreme case gives us some intuition to extend it to a better method. We can consider the other extreme, which is using the entire training set $\mathbb{X}\cup \hat{\mathbb{X}}$ to further train the network $\Phi(x_i; \hat{\mathbf{W}})$. Thus, it is obvious that we can extend these two extreme cases into a unified algorithm, using a hyper-parameter $p$ to control the extent to which we use the old training set $\mathbb{X}$. The algorithm can be defined as follows:
+
+\begin{enumerate}
+	\item We will randomly sample a subset $\mathbf{X}$ from the old training set $\mathbb{X}$, satisfying the size of the subset is $p$ times the size of the old training set, i.e., $|\mathbf{X}| = p|\mathbb{X}|$.
+	\item We will use the combined training set $\mathbf{X} \cup \hat{\mathbb{X}}$ to train the network for an epoch using Stochastic Gradient Descent. By one epoch, we mean that each image $x_i \in \mathbf{X} \cup \hat{\mathbb{X}}$ is used and used exactly once to train the network.
+	\item According to the total defined number of epochs $E$, we will repeat Step 1 and Step 2 $E$ times. Note that we will re-sample a new subset $\mathbf{X}$ before each epoch, to prevent the network from overfitting on specific examples of the old training set.
+\end{enumerate}
+
+In our experiments, we found that this algorithm does not work well, because if $p$ is not large enough, the outputs of the network will still be heavily biased to towards class $N+1$, similar to the extreme case described earlier. This is because the distribution of the number of different classes is different to the original distribution. On the other hand, if we used a large $p$ to balance this issue, the computation cost will be too large since the entire old dataset $\mathbb{X}$ can be very large.
+
+To cope with this issue, we further extended the algorithm, by adjusting the rules for Stochastic Gradient Descent. The general intuition is that, we hope to use a weighted loss instead of unweighted loss for different classes, so that the weights can balance the distribution to the original proportion of training image belonging to each class. For example, originally training data for class $N+1$ might only account for $\frac{1}{N+1}$ of the entire training set. Under our algorithm, it is possible that half of the temporary training set $\mathbf{X} \cup \hat{\mathbb{X}}$ belongs to class $N+1$. In this case, the network's outputs will be biased towards class $N+1$, giving more probability to class $N+1$. Then, we hope to give more weight to the loss of classes $1...N$, to adjust for this imbalance. Formally speaking, we can modify the Stochastic Gradient Descent with momentum rule to achieve this goal. The original SGD with momentum update for one sample of data $x_i$ can be written as:
+\begin{align}
+\left\{
+\begin{aligned}
+	\upsilon_{t+1} &= m\upsilon_t + (1-m)\left( \eta g_i + \eta w_c \mathbf{W}_t \right)\\
+	\mathbf{W}_{t+1} &= \mathbf{W}_{t} - \upsilon_{t+1}
+\end{aligned}
+\right.
+\label{sgdrule}
+\end{align}
+where $\upsilon_t$ denotes the momentum at time step $t$, $\eta$ denote the hyper-parameter learning rate, $w_c$ denote the hyper-parameter weight decay, $m$ denote the hyper-parameter momentum coefficient, and $g_i$ denote the gradient for the data sample $x_i$, which is actually $g_i = \frac{\partial L_i}{\partial \mathbf{W}_t}$. Note that we normally train in batches of data instead of single examples to increase speed and stability. Then $g_i$ should be substituted with the average gradient of the batch of data. But we omit this detail here for simplicity.
+
+We modify Equation \ref{sgdrule} into the following:
+\begin{align}
+\left\{
+\begin{aligned}
+\upsilon_{t+1} &= m\upsilon_t + (1-m)\left( \eta\beta\frac{1}{p} g_i + \eta w_c \mathbf{W}_t \right)&, &   y_i \in \{1...N\}\\
+\upsilon_{t+1} &= m\upsilon_t + (1-m)\left( \eta g_i + \eta w_c \mathbf{W}_t \right)&, &   y_i = N+1\\
+\mathbf{W}_{t+1} &= \mathbf{W}_{t} - \upsilon_{t+1}
+\end{aligned}
+\right.
+\label{sgdrule2}
+\end{align}
+where $y_i$ denote the ground truth label for the sample.
+
+Shown in Equation \ref{sgdrule2}, we multiplied $g_i$ with two coefficients. The coefficient $\frac{1}{p}$, comes from the sampled subset proportion factor $p$, to re-weight the gradients, so that the proportion of every class are re-weighted to original proportion of the whole dataset. However, in our experiments, we found that simply re-weighting to the original proportion is not enough, perhaps because there is more noise coming from samples of classes $1...N$ because relatively fewer samples are used. Therefore, we introduced the hyper-parameter $\beta$, to further adjust the weights.
+
+This method seems quite straightforward, but has not been seen in any literature. Because its performance is not very satisfying, we will regard this method as a baseline method in the experiments.
 
 
