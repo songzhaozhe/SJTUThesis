@@ -96,6 +96,34 @@ where $y_i$ denote the ground truth label for the sample.
 
 Shown in Equation \ref{sgdrule2}, we multiplied $g_i$ with two coefficients. The coefficient $\frac{1}{p}$, comes from the sampled subset proportion factor $p$, to re-weight the gradients, so that the proportion of every class are re-weighted to original proportion of the whole dataset. However, in our experiments, we found that simply re-weighting to the original proportion is not enough, perhaps because there is more noise coming from samples of classes $1...N$ because relatively fewer samples are used. Therefore, we introduced the hyper-parameter $\beta$, to further adjust the weights.
 
-This method seems quite straightforward, but has not been seen in any literature. Because its performance is not very satisfying, we will regard this method as a baseline method in the experiments.
+This method seems quite straightforward, but has not been seen in any literature. Because its performance is not very satisfying, we will regard this method as a baseline method in the experiments. Our algorithm in this paper will be based on this baseline method, which will be introduced in the following section.
+
+
+\section{Our proposed method}
+
+Our intuition is to utilize hard negative mining techniques commonly used in object detection algorithms. Instead of randomly sampling from the old dataset, we prioritize the harder examples, so that we can minimize the data usage from the old dataset, thus saving significant training time. Depending on the actual inference and training speed ratio on hardware, we provide two algorithms for class incremental learning based on hard negative mining. The first case is when inference time is negligible compared to training time on the same set of images. The second case is when inference time and training time are comparable.
+
+\subsection{Under Negligible Inference Time}
+
+The negligible inference time is quite 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
