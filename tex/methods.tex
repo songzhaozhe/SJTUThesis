@@ -105,7 +105,12 @@ Our intuition is to utilize hard negative mining techniques commonly used in obj
 
 \subsection{Under Negligible Inference Time}
 
-The negligible inference time is quite 
+In an inference step for a batch of images, we will perform a forward on the deep neural network, and obtain the network's outputs to predict the classes to which the batch of images belong. In a training step for a batch, however, would be much more complicated. A training step typically consists of the following three parts:
+\begin{enumerate}
+	\item  Forward the network to calculate the outputs.
+	\item Back-propagate the network to calculate the gradients of every parameter with regards to the loss.
+	\item Update every parameter to 
+\end{enumerate}
 
 
 
