@@ -51,7 +51,7 @@ After this transformation, the output of the final fully connected layer $f(\mat
 
 \section{A Straightforward Method}
 
-Utilizing the transformation method introduced in the previous section, we are ready to develop methods to train the newly added parameters, as well as continue training the trained parameters of the network. Following the common practice of training deep neural networks, we will use Stochastic Gradient Descent\cite{he2015deep} (SGD) with momentum\cite{sutskever2013importance} as the default optimization algorithm to train the network.
+Utilizing the transformation method introduced in the previous section, we are ready to develop methods to train the newly added parameters, as well as continue training the trained parameters of the network. Following the common practice of training deep neural networks, we will use Stochastic Gradient Descent\cite{he2016deep} (SGD) with momentum\cite{sutskever2013importance} as the default optimization algorithm to train the network.
 
 Let us first define the accuracy upper bound, which is the accuracy when the parameters $\mathbf{W}$ of deep convolutional network $\Phi(\mathbf{x_i}; \mathbf{W})$ is trained from scratch using the training set $\mathbb{X}\cup \hat{\mathbb{X}}$. It is clear that to obtain this upper bound, lots of training time would be needed. Since all data is used to train the network from scratch, the network will be able to learn more globally optimal and discriminative features to distinguish all $N+1$ class. The time and computation needed to obtain this accuracy upper bound would also be the upper bound of the cost of time and computation. Here, since more computation leads to longer time, we will use the terms computation and time interchangably. Because since it is impossible for other methods to improve the accuracy, the other methods with longer training time will have no meaning of existence compared to this method. The aim of our algorithm, would be to find methods that lie inside the computation upper bound, while maintaining a relatively high accuracy compared to the accuracy upper bound.
 
@@ -59,17 +59,24 @@ Considering this problem, a straightforward intuition is to use the training set
 
 Following the intuition, let us consider an extreme case. We will only use the new data, $\hat{\mathbb{X}}$ to further train the network $\Phi(x_i; \hat{\mathbf{W}})$. By only using the new data, we can save lots of computation, because on average the training set size would only be $\frac{1}{N+1}$ of the whole training set $\mathbb{X}\cup \hat{\mathbb{X}}$. Implementing this idea, the result is that the accuracy for the $N+1$ class will quickly rush to $100\%$, while the accuracy for classes $1...N$ will become $0$. This phenomenon can be explained in this way: Since the network can only see the class $N+1$, the loss would be completely biased towards the class $N+1$. Then, the gradients will quickly let the network output very high confidence on class $N+1$, and very low confidence on classes $1...N$. The gap between those confidence will become worse and worse as we train more and more epochs, because there is only training data for class $N+1$. Thus, we should discard this extreme method since it does not work at all.
 
-However, the extreme case gives us some intuition to extend it to a better method. We can consider the other extreme, which is using the entire training set $\mathbb{X}\cup \hat{\mathbb{X}}$ to further train the network $\Phi(x_i; \hat{\mathbf{W}})$. Thus, it is obvious that we can extend these two extreme cases into a unified algorithm, using a hyper-parameter $p$ to control the extent to which we use the old training set $\mathbb{X}$. The algorithm can be defined as follows:
+However, the extreme case gives us some intuition to extend it to a better method. We can consider the other extreme, which is using the entire training set $\mathbb{X}\cup \hat{\mathbb{X}}$ to further train the network $\Phi(x_i; \hat{\mathbf{W}})$. Thus, it is obvious that we can extend these two extreme cases into a unified algorithm, using a hyper-parameter $p$ to control the extent to which we use the old training set $\mathbb{X}$. The algorithm can be defined as in Algorithm \ref{algo:baseline}.
 
-\begin{enumerate}
-	\item We will randomly sample a subset $\mathbf{X}$ from the old training set $\mathbb{X}$, satisfying the size of the subset is $p$ times the size of the old training set, i.e., $|\mathbf{X}| = p|\mathbb{X}|$.
-	\item We will use the combined training set $\mathbf{X} \cup \hat{\mathbb{X}}$ to train the network for an epoch using Stochastic Gradient Descent. By one epoch, we mean that each image $x_i \in \mathbf{X} \cup \hat{\mathbb{X}}$ is used and used exactly once to train the network.
-	\item According to the total defined number of epochs $E$, we will repeat Step 1 and Step 2 $E$ times. Note that we will re-sample a new subset $\mathbf{X}$ before each epoch, to prevent the network from overfitting on specific examples of the old training set.
-\end{enumerate}
+
+\begin{algorithm}
+	\caption{A class-incremental learning baseline algorithm}
+	\label{algo:baseline}
+	\begin{algorithmic}
+		\For{$i = 0 \to MAX\_EPOCH$} 
+		\State \textbf{Step 1:} Randomly sample a subset $\mathbf{X}$ from the old training set $\mathbb{X}$, satisfying the size of the subset is $p$ times the size of the old training set, i.e., $|\mathbf{X}| = p|\mathbb{X}|$.
+		\State \textbf{Step 2:} Use the combined training set $\mathbf{X} \cup \hat{\mathbb{X}}$ to train the network for an epoch using Stochastic Gradient Descent. By one epoch, we mean that each image $x_i \in \mathbf{X} \cup \hat{\mathbb{X}}$ is used and used exactly once to train the network.
+		\State \textbf{Step 3:} Use the combined training set $\mathbf{X} \cup \hat{\mathbb{X}}$ to train the network for an epoch using our modified version of Stochastic Gradient Descent, following Equation \ref{sgdrule2}. By one epoch, we mean that each image $x_i \in \mathbf{X} \cup \hat{\mathbb{X}}$ is used and used exactly once to train the network.
+		\EndFor
+	\end{algorithmic}
+\end{algorithm}
 
 In our experiments, we found that this algorithm does not work well, because if $p$ is not large enough, the outputs of the network will still be heavily biased to towards class $N+1$, similar to the extreme case described earlier. This is because the distribution of the number of different classes is different to the original distribution. On the other hand, if we used a large $p$ to balance this issue, the computation cost will be too large since the entire old dataset $\mathbb{X}$ can be very large.
 
-To cope with this issue, we further extended the algorithm, by adjusting the rules for Stochastic Gradient Descent. The general intuition is that, we hope to use a weighted loss instead of unweighted loss for different classes, so that the weights can balance the distribution to the original proportion of training image belonging to each class. For example, originally training data for class $N+1$ might only account for $\frac{1}{N+1}$ of the entire training set. Under our algorithm, it is possible that half of the temporary training set $\mathbf{X} \cup \hat{\mathbb{X}}$ belongs to class $N+1$. In this case, the network's outputs will be biased towards class $N+1$, giving more probability to class $N+1$. Then, we hope to give more weight to the loss of classes $1...N$, to adjust for this imbalance. Formally speaking, we can modify the Stochastic Gradient Descent with momentum rule to achieve this goal. The original SGD with momentum update for one sample of data $x_i$ can be written as:
+To cope with this issue, we further extended the algorithm, by adjusting the rules for Stochastic Gradient Descent. The general intuition is that, we hope to use a weighted loss instead of unweighted loss for different classes, so that the weights can balance the distribution to the original proportion of training image belonging to each class. For example, originally training data for class $N+1$ might only account for $\frac{1}{N+1}$ of the entire training set. Under our algorithm, it is possible that half of the temporary training set $\mathbf{X} \cup \hat{\mathbb{X}}$ belongs to class $N+1$. In this case, the network's outputs will be biased towards class $N+1$, giving more probability to class $N+1$. Then, we hope to give more weight to the loss of classes $1...N$, to adjust for this imbalance. Formally speaking, we can modify the Stochastic Gradient Descent with momentum rule to achieve this goal. The standard SGD with momentum update for one sample of data $x_i$ can be written as:
 \begin{align}
 \left\{
 \begin{aligned}
@@ -97,32 +104,65 @@ where $y_i$ denote the ground truth label for the sample.
 Shown in Equation \ref{sgdrule2}, we multiplied $g_i$ with two coefficients. The coefficient $\frac{1}{p}$, comes from the sampled subset proportion factor $p$, to re-weight the gradients, so that the proportion of every class are re-weighted to original proportion of the whole dataset. However, in our experiments, we found that simply re-weighting to the original proportion is not enough, perhaps because there is more noise coming from samples of classes $1...N$ because relatively fewer samples are used. Therefore, we introduced the hyper-parameter $\beta$, to further adjust the weights.
 
 This method seems quite straightforward, but has not been seen in any literature. Because its performance is not very satisfying, we will regard this method as a baseline method in the experiments. Our algorithm in this paper will be based on this baseline method, which will be introduced in the following section.
-
+\label{baselinesection}
 
 \section{Our proposed method}
 
 Our intuition is to utilize hard negative mining techniques commonly used in object detection algorithms. Instead of randomly sampling from the old dataset, we prioritize the harder examples, so that we can minimize the data usage from the old dataset, thus saving significant training time. Depending on the actual inference and training speed ratio on hardware, we provide two algorithms for class incremental learning based on hard negative mining. The first case is when inference time is negligible compared to training time on the same set of images. The second case is when inference time and training time are comparable.
 
-\subsection{Under Negligible Inference Time}
-Let us first consider an ideal case 
-In an inference step for a batch of images, we will perform a forward on the deep neural network, and obtain the network's outputs to predict the classes to which the batch of images belong. In a training step for a batch, however, would be much more complicated. A training step typically consists of the following three parts:
+\subsection{Under Fast Inference Speed Condition}
+Let us first consider a simpler case, where inference time can be neglected compared to training time. First, we will explain why inference time can be much faster than training time, to elaborate that this case is indeed possible.
+\subsubsection{Model Inference Time analysis}
+In an inference step for a batch of images, we will perform a forward on the deep neural network, and obtain the network's outputs to predict the classes to which the batch of images belong. A inference step typically include only one step:
+\begin{enumerate}
+	\item  Forward the network to calculate the outputs.
+\end{enumerate}
+
+In a training step for a batch, however, would be much more complicated. A training step typically consists of the following three parts:
 \begin{enumerate}
 	\item  Forward the network to calculate the outputs.
 	\item Back-propagate the network to calculate the gradients of every parameter with regards to the loss.
-	\item Update every parameter to 
+	\item Update every parameter using an optimization algorithm like SGD with the gradients.
 \end{enumerate}
+Suppose there are $|\mathbf{W}|$ parameters in all in a convolutional network. Since the network is a directed acyclic graph (DAG), the forwarding and back-propagation time is similar since every node will be calculated once. Roughly speaking, without other optimizations, inference takes about $1/3$ of training time.
 
+Moreover, the introduction of TensorRT toolkit by NVIDIA enabled even much faster inference speed. They used techniques like Precision Calibration, Layer and Tensor Fusion, Kernel Auto-Tuning, Dynamic Tensor Memory and Multi-Stream Execution, and enabled inference speed to be approximately $20\times$ faster on the same GPU.
 
+\subsubsection{Algorithm}
+Under such circumstances, we design our algorithm as the following steps in Algorithm \ref{algo:fast}. Note that $p$ has the same meaning as in section \ref{baselinesection}.
 
+\begin{algorithm}
+\caption{Class-incremental learning based on Hard Mining under negligible inference time}
+\label{algo:fast}
+	\begin{algorithmic}
+		\For{$i = 0 \to MAX\_EPOCH$} 
+		\State \textbf{Step 1:} Do one round of inference on the old training set $\mathbb{X}$, and record the model's confidence score on the ground truth class. In the meantime, maintain a priority queue \textit{q}, with a maximum size of $\alpha p |\mathbb{X}|$. The priority queue \textit{q} stores the $\alpha p |\mathbb{X}|$ worst performing images. $\alpha$ is a hyper-parameter larger than $1$.
+		\State \textbf{Step 2:} Randomly sample $p$ images from the priority queue \textit{q}. We denote the sampled set of images as $\mathbf{X}$. 
+		\State \textbf{Step 3:} Use the combined training set $\mathbf{X} \cup \hat{\mathbb{X}}$ to train the network for an epoch using our modified version of Stochastic Gradient Descent, following Equation \ref{sgdrule2}. By one epoch, we mean that each image $x_i \in \mathbf{X} \cup \hat{\mathbb{X}}$ is used and used exactly once to train the network.
+		\EndFor
+	\end{algorithmic}
+\end{algorithm}
+Due to our empirical analysis, to achieve better results, we added several hyper-parameters in this algorithm, such as $\alpha$ and $\beta$. 
 
+\subsection{Under Slow Inference Speed}
 
+In many cases, we do not have such fast inference speed as illustrated in the previous section. For example, the toolkit TensorRT might degrade performance, and might not be available for all platforms. Moreover, we have to spend time optimizing the model's inference speed, before we can benefit from the fast inference speed. So usually, although inference speed is still much faster than training speed, the inference time spent on going through the whole training set is not bearable.
 
+Under such case, we can no longer follow Step 1 in Algorithm \ref{algo:slow}, because it does not update the model at all, so the time cost would be too much. Alternatively, we can do a simple modification to Step 1. Instead of freezing the model and test on all old training data $\mathbb{X}$, we train the model on $\mathbb{X}\cup \hat{\mathbb{X}}$ in order not to waste time on testing. In this way, Step 1 is modified so that in this step the model gets trained, and in the mean time we collect the images that the model do not perform well in the priority queue \textit{q}. This modification actually involves an approximation. It is based on the assumption that the relative hardness of images does not change much as the model updates its parameter in the new version of Step 1. Fortunately, shown in the experiments, this modification does work well.
 
+The new algorithm can be summarized in Algorithm \ref{algo:slow}.
 
-
-
-
-
+\begin{algorithm}
+	\caption{Class-incremental learning based on Hard Mining for slow inference speed platforms}
+	\label{algo:slow}
+	\begin{algorithmic}
+		\For{$i = 0 \to MAX\_EPOCH$} 
+		\State \textbf{Step 1:} Do one round of training on the entire mixed training set $\mathbb{X}\cup \hat{\mathbb{X}}$, and record the model's confidence score on the ground truth class. In the meantime, maintain a priority queue \textit{q}, with a maximum size of $\alpha p |\mathbb{X}|$. The priority queue \textit{q} stores the $\alpha p |\mathbb{X}|$ worst performing images belonging to the old dataset $\mathbb{X}$.
+		\State \textbf{Step 2:} Randomly sample $p$ images from the priority queue \textit{q}. We denote the sampled set of images as $\mathbf{X}$. 
+		\State \textbf{Step 3:} Use the combined training set $\mathbf{X} \cup \hat{\mathbb{X}}$ to train the network for an epoch using our modified version of Stochastic Gradient Descent, following Equation \ref{sgdrule2}.
+		\EndFor
+	\end{algorithmic}
+\end{algorithm}
 
 
 

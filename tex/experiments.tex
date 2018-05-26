@@ -1,3 +1,36 @@
 %# -*- coding: utf-8-unix -*-
 \chapter{Experiments}
-fjdksl
+\section{Dataset and Metrics}
+In the field of incremental learning, there are not any publicly available datasets specialized for this problem. Following the common practices in other papers, we can artificially construct datasets for incremental learning, using publicly available machine learning datasets, by artificially hiding training data from the model and increment the data gradually. In our paper, since we focused on class-incremental learning for image classification, we follow the common practice in relevant papers to construct the incremental setting using the CIFAR-10 and CIFAR-100 image classification dataset. We can construct the dataset in the following way:
+\begin{enumerate}
+	\item In the beginning, assume the model can only use the first $C$ classes of data as training set. Train the model with them.
+	\item Add a new class of data into the training set so that the total number of classes become $C+1$, and perform class-incremental learning algorithms. 
+	\item Test the model's performance on the $C+1$ classes. Depending on the metric, we may merely consider the average accuracy for the $C+1$ classes, or require that both accuracy for the first $C$ classes and accuracy for the $C+1$-th class are high.
+	\item Let $C \gets C+1$. Depending on the concrete metrics, terminate or repeat Steps 1,2,3 again until $C$ reaches the maximum number of classes in the original dataset.
+\end{enumerate}
+
+
+
+\subsection{CIFAR-10 Dataset}
+
+The CIFAR-10 Dataset is collected by Alex and Hinton etc.\cite{krizhevsky2009learning} and maintained by the CIFAR organization. This dataset is an image classification dataset. The dataset contains sixty thousand images in total. The dataset contains 10 classes in all, and there are six thousand images belonging to each class. The images are in the size of $32 \times 32$, with RGB 3 dimensions. The dataset is divided into the training set and test set already by its creators. The training set consists of fifty thousand images, and the remaining ten thousand images belong to the test set. Each class has exactly five thousand images in the training set, and one thousand images in the test set. Since the images are very tiny, deep networks can run relatively fast on this dataset.
+
+Typically, deep neural networks can achieve more than $90\%$ accuracy on this dataset. The state-of-the-art paper using Shake-Shake Regularization\cite{gastaldi2017shake}, achieved $2.86\%$ accuracy on this dataset. Actually they used lots of tricks and trained for a much longer time. For example, they used cyclic learning rates, and trained for four hundred epochs instead of fewer than two hundred epochs as commonly used by other papers.
+
+\subsection{CIFAR-100 Dataset}
+The CIFAR-100 Dataset is an extension to CIFAR-10 Dataset. The dataset contains sixty thousand images too. The dataset contains 100 classes in all, and there are six hundred images belonging to each class. The images are in RGB 3 dimensions. They are in the size of $32 \times 32$. The dataset is divided into the training set and test set on the website. The training set includes fifty thousand images, and the rest ten thousand images are in the test set. Each class has exactly one thousand images in the test set, and five thousand images in the training set.
+
+Compared to CIFAR-10, this dataset has the same number of images, so the training and testing time is similar for similar networks. Since there are 100 classes, the problem becomes much harder for deep networks to recognize. Thus typically, most deep networks can only achieve about $80\%$ accuracy on this dataset. The best results up to now is also the paper \cite{gastaldi2017shake}, and they achieved $15.85\%$ accuracy.
+
+\subsection{Evaluation Metric}
+
+In this paper, we follow the evaluation protocol for class-incremental learning introduced in the paper ICaRL\cite{rebuffi2017icarl}. Before that paper, there does not exist any agreed benchmark protocol for evaluating class-incremental learning methods. In the protocol, we will use a multi-class image classification dataset like CIFAR-10 and CIFAR-100. Given such a dataset, the classes will be arranged in a fixed random order. To compare between each method, each method will be trained in a class-incremental way on the gradually available training data. After adding each class or adding a batch of classes at a time, the classifier will be tested on the test data part of the dataset, considering only the classes that are already been learned. Doing this, we can obtain a curve of the classification accuracies after each batch of incremented classes. We will repeat this procedure for 10 times with different random class orders and average over the curve.
+
+
+
+
+
+
+
+
+
