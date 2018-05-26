@@ -104,7 +104,7 @@ This method seems quite straightforward, but has not been seen in any literature
 Our intuition is to utilize hard negative mining techniques commonly used in object detection algorithms. Instead of randomly sampling from the old dataset, we prioritize the harder examples, so that we can minimize the data usage from the old dataset, thus saving significant training time. Depending on the actual inference and training speed ratio on hardware, we provide two algorithms for class incremental learning based on hard negative mining. The first case is when inference time is negligible compared to training time on the same set of images. The second case is when inference time and training time are comparable.
 
 \subsection{Under Negligible Inference Time}
-
+Let us first consider an ideal case 
 In an inference step for a batch of images, we will perform a forward on the deep neural network, and obtain the network's outputs to predict the classes to which the batch of images belong. In a training step for a batch, however, would be much more complicated. A training step typically consists of the following three parts:
 \begin{enumerate}
 	\item  Forward the network to calculate the outputs.
