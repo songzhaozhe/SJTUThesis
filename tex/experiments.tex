@@ -129,10 +129,59 @@ Next, we also show the accuracies of each class after all 100 classes are added.
 	\end{tabular}
 \end{table}
 \subsection{Performance on CIFAR-10 Dataset}
-We also tested our method on the CIFAR-10 Dataset. The curves are shown in Fig. 
+We also tested our method on the CIFAR-10 Dataset. The setting is the same, i.e., we set max epoch to be 4 when we add every class. The curves are shown in Fig~\ref{fig:cifar10-resnet} and Fig.~\ref{fig:cifar10-mobilenetv2}.
 
-We can see that the curves are very similar to the curves compared to CIFAR-100. This shows the robustness of our method under different datasets.
 
+
+We can see that the curves are very similar to the curves compared to CIFAR-100. This shows the robustness of our method under different datasets. It is worth noting that this time our model performs further worse than the accuracy upper bound. This is due to lack of training time, since training 10 class from scratch takes 160 epochs, while we only used at most $10 \times 4 = 40$ epochs. We believe our curve would be higher when we increased the training time.
+\begin{figure}[!htp]
+	\centering
+	\includegraphics[width=12cm]{cifar10-resnet.png}
+	\bicaption[Evaluation result on CIFAR-10 Dataset with ResNet32]
+	{用ResNet32网络在CIFAR-10数据集上表现}
+	{Evaluation result on CIFAR-10 Dataset with ResNet32}
+	\label{fig:cifar10-resnet}
+\end{figure}
+\begin{figure}[!htp]
+	\centering
+	\includegraphics[width=12cm]{cifar10-mobilenetv2.png}
+	\bicaption[Evaluation result on CIFAR-10 Dataset with MobileNetV2]
+	{用MobileNetV2网络在CIFAR-10数据集上表现}
+	{Evaluation result on CIFAR-10 Dataset with MobileNetV2}
+	\label{fig:cifar10-mobilenetv2}
+\end{figure}
+We also show tested the per-class accuracy in Table \ref{cifar10_resnet} and Table \ref{cifar10_mobilenetv2}, to see that our model learns knowledge for every class.
+\begin{table}[!hpb]
+	\centering
+	\bicaption[The per-class accuracy in CIFAR-10 results for ResNet20]
+	{ResNet20在CIFAR-10结果中各类别准确率}
+	{The per-class accuracy in CIFAR-10 results for ResNet20}
+	\label{tab:firstone}
+	\begin{tabular}{@{}lp{10cm}@{}} \toprule
+		Case &  Final accuracy on each of the 100 classes ($\%$)\\ \midrule
+		$\lambda=1$  &[88.5, 94.1, 82.3, 65.8, 87.3, 84.9, 89.0, 89.9, 93.4, 92.7]
+		\\
+		$\lambda=0.01$  & [85.5, 91.4, 70.7, 63.8, 79.8, 76.0, 85.4, 80.8, 89.0, 87.0]\\ \bottomrule
+		\label{tab:cifar10_resnet}
+	\end{tabular}
+\end{table}
+
+\begin{table}[!hpb]
+	\centering
+	\bicaption[The per-class accuracy in CIFAR-10 results for MobileNetV2]
+	{MobileNetV2在CIFAR-10结果中各类别准确率}
+	{The per-class accuracy in CIFAR-10 results for MobileNetV2}
+	\label{tab:firstone}
+	\begin{tabular}{@{}lp{10cm}@{}} \toprule
+		Case &  Final accuracy on each of the 100 classes ($\%$)\\ \midrule
+		$\lambda=1$  &[88.1, 93.3, 79.8, 68.7, 86.9, 77.4, 88.8, 88.4, 91.7, 88.7]
+		
+		\\
+		$\lambda=0.01$  & [83.3, 91.9, 72.6, 64.7, 79.4, 67.9, 87.0, 80.4, 86.0, 84.1]
+		\\ \bottomrule
+		\label{tab:cifar10_mobilenetv2}
+	\end{tabular}
+\end{table}
 \subsection{Under negligible inference speed}
 We also tested our Algorithm \ref{algo:fast} under negligible inference speed. We used ResNet32 to evaluate. Since time and computational resource is limited, we are unable plot the whole curve. As an alternative, we first train the model using the first 99 classes from scratch. Then, we add the 100-th class and perform our incremental learning algorithm. We will compare the average accuracy for 100 classes, as well as per-class accuracy to evaluate our algorithm.
 
