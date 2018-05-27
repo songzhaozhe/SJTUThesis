@@ -32,11 +32,11 @@ In the experiments, we will evaluate our method on two representative network st
 
 In the following experiments, we will set the hyper-parameter $\alpha$ as 2. The hyper-parameter $\beta$ is set to 1. The learning rate, if not specified, would be 0.1 in the first half of epochs, and 0.01 in the second half of epochs. The weight decay is set to 0.0001. The momentum for the momentum-based Stochastic Gradient Descent optimizer is set to 0.9. The max epoch parameter to be used after adding each class is set to 2. Note that for $\lambda=1$ in Algorithm \ref{algo:slow}, there it will be equivalent to training for 4 epochs, because one epoch is trained in Step 1 and one epoch is trained in Step 2.
 
-Unless specified, we present the results using Algorithm \ref{algo:slow}, because our experiment machines usually do not have such fast inference speed.
+Unless specified, we present the results using Algorithm \ref{algo:slow}, because our experiment machines usually do not have such fast inference speed. A model trained from scratch will typically need 160 epochs. In the experiments, after adding one class, we only used $2~4$ epochs. Thus, our method works extremely fast, using only about $1/80$ of the computation.
 
 \subsection{Performance on CIFAR-100 Dataset using ResNet32}
 
-We first test the performance using ResNet. Since ICaRL used ResNet32 as their feature extractor, we use ResNet32 too, where the number 32 refers to the number of layers. We first present the results on CIFAR-100 Dataset, because the relevant paper, ICaRL, did not test their results on CIFAR-10. We incremented one class at a time. But ICaRL worked poorly when incrementing one class at a time perhaps due to the preferences of their algorithm, so we used their results when every time a batch of 10 new class of data arrives. 
+We first test the performance using ResNet. Since ICaRL used ResNet32 as their feature extractor, we use ResNet32 too, where the number 32 refers to the number of layers. We follow the concrete dimensions and structure used in the ResNet paper\cite{he2016deep}. We first present the results on CIFAR-100 Dataset, because the relevant paper, ICaRL, did not test their results on CIFAR-10. We incremented one class at a time. But ICaRL worked poorly when incrementing one class at a time perhaps due to the preferences of their algorithm, so we used their results when every time a batch of 10 new class of data arrives. 
 
 \begin{figure}[!htp]
 	\centering
@@ -57,7 +57,7 @@ There is also an interesting trend shown in our curves. During the 10 to 25 clas
 Average values might not truly reflect the knowledge the model has learned. Next, we want to see whether the accuracies of each class are high enough, so that the network really learned knowledge for every class, instead of biasing towards specific classes. Shown in Table \ref{tab:cifar100}, we do not see obvious bias for specific classes using our algorithm. This indicates that our algorithm is able to learn knowledge for every class effectively. Note that the accuracy varies quite a lot for different classes, from $45\%$ to $85\%$. This is because the difficulty of recognizing every class is different.
 \begin{table}[!hpb]
 	\centering
-	\bicaption[指向一个表格的表目录索引]
+	\bicaption[The per-class accuracy in CIFAR-100 results]
 	{CIFAR-100结果中各类别准确率}
 	{The per-class accuracy in CIFAR-100 results}
 	\label{tab:firstone}
@@ -68,10 +68,119 @@ Average values might not truly reflect the knowledge the model has learned. Next
 		87.0, 73.0, 63.0, 76.0, 46.0, 60.0, 57.0, 80.0, 86.0, 62.0, 64.0, 68.0, 51.0, 76.0, 86.0, 60.0, 66.0, 77.0, 69.0, 83.0, 74.0, 81.0, 79.0, 75.0, 58.0, 53.0, 91.0, 66.0, 68.0, 74.0, 47.0, 64.0]\\
 		$\lambda=1$  &[82.0, 77.0, 62.0, 45.0, 53.0, 73.0, 75.0, 60.0, 86.0, 80.0, 52.0, 43.0, 74.0, 59.0, 69.0, 66.0, 76.0, 82.0, 57.0, 64.0, 81.0, 80.0, 66.0, 83.0, 81.0, 59.0, 65.0, 67.0, 80.0, 68.0, 66.0, 57.0, 67.0, 66.0, 72.0, 53.0, 79.0, 67.0, 60.0, 88.0, 60.0, 82.0, 71.0, 76.0, 46.0, 53.0, 50.0, 52.0, 92.0, 84.0, 49.0, 75.0, 69.0, 88.0, 83.0, 53.0, 81.0, 80.0, 79.0, 66.0, 86.0, 68.0, 72.0, 55.0, 54.0, 57.0, 67.0, 60.0, 88.0, 76.0, 63.0, 79.0, 42.0, 49.0, 50.0, 85.0, 88.0, 62.0, 53.0, 71.0, 43.0, 74.0, 85.0, 51.0, 68.0, 81.0, 74.0, 76.0, 75.0, 81.0, 81.0, 70.0, 54.0, 59.0, 84.0, 70.0, 55.0, 68.0, 48.0, 68.0]
 		\\
-		$\lambda=0.01$  & [85.0, 82.0, 59.0, 45.0, 57.0, 69.0, 73.0, 71.0, 80.0, 85.0, 53.0, 48.0, 77.0, 64.0, 56.0, 67.0, 72.0, 85.0, 63.0, 61.0, 81.0, 85.0, 65.0, 71.0, 82.0, 58.0, 62.0, 54.0, 79.0, 65.0, 53.0, 72.0, 71.0, 62.0, 72.0, 45.0, 76.0, 71.0, 60.0, 84.0, 61.0, 80.0, 68.0, 68.0, 40.0, 46.0, 35.0, 49.0, 93.0, 77.0, 49.0, 65.0, 65.0, 87.0, 83.0, 47.0, 83.0, 73.0, 75.0, 66.0, 85.0, 67.0, 61.0, 59.0, 34.0, 53.0, 74.0, 51.0, 85.0, 79.0, 59.0, 75.0, 41.0, 37.0, 50.0, 81.0, 83.0, 57.0, 54.0, 64.0, 45.0, 74.0, 84.0, 62.0, 67.0, 78.0, 68.0, 78.0, 76.0, 80.0, 74.0, 79.0, 45.0, 49.0, 89.0, 63.0, 63.0, 59.0, 48.0, 70.0]
-		 \\
+		$\lambda=0.01$  & [85.0, 82.0, 59.0, 45.0, 57.0, 69.0, 73.0, 71.0, 80.0, 85.0, 53.0, 48.0, 77.0, 64.0, 56.0, 67.0, 72.0, 85.0, 63.0, 61.0, 81.0, 85.0, 65.0, 71.0, 82.0, 58.0, 62.0, 54.0, 79.0, 65.0, 53.0, 72.0, 71.0, 62.0, 72.0, 45.0, 76.0, 71.0, 60.0, 84.0, 61.0, 80.0, 68.0, 68.0, 40.0, 46.0, 35.0, 49.0, 93.0, 77.0, 49.0, 65.0, 65.0, 87.0, 83.0, 47.0, 83.0, 73.0, 75.0, 66.0, 85.0, 67.0, 61.0, 59.0, 34.0, 53.0, 74.0, 51.0, 85.0, 79.0, 59.0, 75.0, 41.0, 37.0, 50.0, 81.0, 83.0, 57.0, 54.0, 64.0, 45.0, 74.0, 84.0, 62.0, 67.0, 78.0, 68.0, 78.0, 76.0, 80.0, 74.0, 79.0, 45.0, 49.0, 89.0, 63.0, 63.0, 59.0, 48.0, 70.0]\\ \bottomrule
 \label{tab:cifar100}
 	\end{tabular}
 \end{table}
+
+\subsection{Performance on CIFAR-100 Dataset using MobileNetV2}
+
+To show the effectiveness of our algorithm on other deep learning network structures, we selected another network, MobileNetV2\cite{sandler2018inverted}, to evaluate our algorithm. MobileNetV2 is a state-of-the-art network structure for mobile devices, designed to be small and efficient.
+
+In the MobileNetV2 paper, they only ran experiments on ImageNet, and they did not design any concrete model for CIFAR datasets. Thus, we followed their practice and designed the structure ourselves, to let the network be suitable for CIFAR dataset. Our MobileNetV2 structure is shown in Table \ref{tab:mobilenetv2}. We used the same notations as their paper. $t$ refers to the expansion factor applied to the input size. $c$ refers to the output channels of every layer in the same stage. $n$ refers to how many time the basic MobileNetV2 block is repeated in the stage. $s$ refers to the total stride of the stage. $k$ refers to the number of output classes. In CIFAR-10, $k=10$, and in CIFAR-100, $k=100$.
+\begin{table}[!hpb]
+	\centering
+	\bicaption[Our MobileNetV2 model architecture for CIFAR]
+	{用在CIFAR数据集上的MobileNetV2结构}
+	{Our MobileNetV2 model architecture for CIFAR}
+	\label{tab:mobilenetv2}
+	\begin{tabular}{@{}llllll@{}} \toprule
+		Input & Operator & $t$ & $c$ & $n$ & $s$\\ \midrule
+		$32^2\times3$ & conv2d & - &32&1&2\\ 
+		$16^2\times32$ & bottleneck & 1 &16&1&1\\ 
+		$16^2\times16$ & bottleneck & 6 &24&2&1\\ 
+		$16^2\times24$ & bottleneck & 6 &32&3&2\\ 
+		$8^2\times32$ & bottleneck & 6 &64&4&2\\ 		
+		$4^2\times64$ & bottleneck & 6 &96&3&1\\ 
+		$4^2\times96$ & avgpool $4\times4$ & - &-&1&-\\ 	
+		$1\times1\times k$ & fully-connected layer & - &$k$&-&-\\ 				
+		\bottomrule
+		\label{tab:cifar100_mobile}
+	\end{tabular}
+\end{table}
+\begin{figure}[!htp]
+	\centering
+	\includegraphics[width=12cm]{cifar100_mobile.png}
+	\bicaption[Performance comparison on CIFAR-100 Dataset with MobileNetV2]
+	{用MobileNetV2网络在CIFAR-100数据集上表现}
+	{Performance comparison on CIFAR-100 Dataset with MobileNetV2}
+	\label{fig:cifar100_mobile}
+\end{figure}
+
+
+Fig.~\ref{fig:cifar100_mobile} shows the accuracy of the model as more and more classes are added one by one. As we can see, the curves exhibit similar behaviour compared to ResNet32. We did not compare with ICaRL because they only tested on ResNet. Same with ResNet, with lower $\lambda$, we will degrade some accuracy, but we save more computation time. With higher $\lambda$, we spend more computation time, but we can obtain higher accuracy. The highest accuracy when $\lambda=1$ gives near to optimal accuracy.
+
+Next, we also show the accuracies of each class after all 100 classes are added. Shown in Table \ref{tab:cifar100_mobile}, we see that our algorithm can let the model learn to recognize each class. The model do not have bias towards specific classes.
+\begin{table}[!hpb]
+	\centering
+	\bicaption[The per-class accuracy in CIFAR-100 results with MobileNetV2]
+	{CIFAR-100结果中各类别准确率}
+	{The per-class accuracy in CIFAR-100 results with MobileNetV2}
+	\label{tab:firstone}
+	\begin{tabular}{@{}lp{10cm}@{}} \toprule
+		Case &  Final accuracy on each of the 100 classes ($\%$)\\ \midrule
+		$\lambda=1$  &[90.0, 83.0, 57.0, 40.0, 59.0, 71.0, 79.0, 67.0, 86.0, 73.0, 49.0, 49.0, 83.0, 61.0, 60.0, 68.0, 67.0, 89.0, 67.0, 53.0, 85.0, 84.0, 60.0, 79.0, 83.0, 63.0, 69.0, 64.0, 77.0, 66.0, 58.0, 70.0, 65.0, 63.0, 75.0, 32.0, 69.0, 72.0, 55.0, 85.0, 61.0, 85.0, 71.0, 77.0, 44.0, 55.0, 47.0, 55.0, 94.0, 81.0, 54.0, 72.0, 72.0, 88.0, 83.0, 49.0, 78.0, 75.0, 76.0, 71.0, 85.0, 71.0, 73.0, 62.0, 55.0, 58.0, 68.0, 58.0, 93.0, 78.0, 67.0, 79.0, 40.0, 50.0, 55.0, 83.0, 92.0, 62.0, 56.0, 75.0, 48.0, 74.0, 89.0, 63.0, 66.0, 75.0, 67.0, 72.0, 73.0, 82.0, 75.0, 72.0, 61.0, 49.0, 88.0, 67.0, 61.0, 62.0, 38.0, 67.0]
+		
+		\\
+		$\lambda=0.01$  & [87.0, 84.0, 58.0, 38.0, 54.0, 71.0, 80.0, 71.0, 80.0, 78.0, 44.0, 43.0, 80.0, 54.0, 56.0, 69.0, 69.0, 81.0, 67.0, 62.0, 82.0, 82.0, 65.0, 80.0, 80.0, 55.0, 60.0, 51.0, 80.0, 62.0, 65.0, 72.0, 65.0, 58.0, 67.0, 50.0, 75.0, 63.0, 57.0, 82.0, 58.0, 86.0, 75.0, 79.0, 40.0, 53.0, 46.0, 58.0, 88.0, 79.0, 46.0, 71.0, 64.0, 87.0, 80.0, 44.0, 84.0, 74.0, 77.0, 52.0, 87.0, 67.0, 70.0, 56.0, 52.0, 48.0, 73.0, 53.0, 88.0, 72.0, 76.0, 83.0, 45.0, 41.0, 43.0, 86.0, 87.0, 56.0, 61.0, 73.0, 44.0, 75.0, 86.0, 53.0, 65.0, 77.0, 69.0, 81.0, 67.0, 83.0, 75.0, 72.0, 60.0, 48.0, 88.0, 62.0, 67.0, 64.0, 39.0, 64.0]
+		
+		\\ \bottomrule
+		\label{tab:cifar100_mobile}
+	\end{tabular}
+\end{table}
+\subsection{Performance on CIFAR-10 Dataset}
+We also tested our method on the CIFAR-10 Dataset. The curves are shown in Fig. 
+
+We can see that the curves are very similar to the curves compared to CIFAR-100. This shows the robustness of our method under different datasets.
+
+\subsection{Under negligible inference speed}
+We also tested our Algorithm \ref{algo:fast} under negligible inference speed. We used ResNet32 to evaluate. Since time and computational resource is limited, we are unable plot the whole curve. As an alternative, we first train the model using the first 99 classes from scratch. Then, we add the 100-th class and perform our incremental learning algorithm. We will compare the average accuracy for 100 classes, as well as per-class accuracy to evaluate our algorithm.
+
+We compared our algorithm with the baseline algorithm Algorithm \ref{algo:baseline}. For all tests, we used a constant learning rate of $0.01$. The max epoch parameter is set to 4. However, we should note that, since the time of Step 1 can be neglected, the time consumption is much more smaller. Compared to training on the full epoch, our speed up ratio can be calculated as
+\begin{align}
+\eta = \frac{99+1}{\lambda \times 99 + 1} \approx \frac{1}{\lambda}
+\end{align}
+Thus, the speed up is almost proportional to $1/\lambda$. In the following, we tested the results for $\lambda=0.1$ and $\lambda=0.01$.
+
+\begin{table}[!hpb]
+	\centering
+	\bicaption[The results]
+	{CIFAR-100结果中各类别准确率}
+	{The per-class accuracy in CIFAR-100 results with MobileNetV2}
+	\label{tab:firstone}
+	\begin{tabular}{@{}lllp{8cm}@{}} \toprule
+		Algorithm & $\lambda$ &Avg. Accuracy&  Final accuracy on each of the 100 classes ($\%$)\\ \midrule
+		Baseline&$\lambda=0.01$&  44.58& [72.0, 55.0, 42.0, 26.0, 23.0, 58.0, 47.0, 54.0, 41.0, 66.0, 8.0, 39.0, 45.0, 48.0, 19.0, 48.0, 57.0, 74.0, 24.0, 30.0, 65.0, 60.0, 31.0, 61.0, 71.0, 34.0, 32.0, 12.0, 57.0, 32.0, 34.0, 39.0, 40.0, 21.0, 53.0, 28.0, 64.0, 64.0, 37.0, 59.0, 17.0, 67.0, 45.0, 58.0, 3.0, 9.0, 41.0, 54.0, 73.0, 56.0, 23.0, 32.0, 53.0, 62.0, 57.0, 10.0, 68.0, 52.0, 73.0, 61.0, 74.0, 12.0, 48.0, 47.0, 30.0, 21.0, 52.0, 13.0, 72.0, 47.0, 54.0, 66.0, 16.0, 22.0, 24.0, 34.0, 74.0, 18.0, 2.0, 34.0, 25.0, 57.0, 74.0, 34.0, 40.0, 58.0, 37.0, 57.0, 55.0, 50.0, 61.0, 54.0, 38.0, 19.0, 81.0, 50.0, 44.0, 54.0, 27.0, 99.0]\\
+		Algo. \ref{algo:fast}&$\lambda=0.01$&  53.43& [81.0, 65.0, 44.0, 30.0, 35.0, 64.0, 60.0, 61.0, 60.0, 69.0, 22.0, 49.0, 61.0, 47.0, 38.0, 55.0, 59.0, 71.0, 37.0, 39.0, 73.0, 69.0, 52.0, 68.0, 78.0, 42.0, 40.0, 24.0, 63.0, 47.0, 53.0, 46.0, 50.0, 42.0,
+		65.0, 39.0, 72.0, 64.0, 50.0, 73.0, 23.0, 75.0, 44.0, 69.0, 11.0, 32.0, 43.0, 60.0, 88.0, 71.0, 28.0, 50.0, 52.0, 69.0, 65.0, 20.0, 76.0, 63.0, 84.0, 54.0, 77.0, 23.0, 64.0, 48.0, 39.0, 30.0, 61.0, 24.0,
+		86.0, 52.0, 56.0, 72.0, 27.0, 32.0, 30.0, 55.0, 83.0, 32.0, 7.0, 54.0, 33.0, 66.0, 80.0, 45.0, 42.0, 64.0, 50.0, 63.0, 64.0, 59.0, 66.0, 56.0, 53.0, 34.0, 86.0, 61.0, 51.0, 63.0, 37.0, 84.0]
+		\\ \bottomrule
+		\label{tab:cifar100_mobile}
+	\end{tabular}
+\end{table}
+\begin{table}[!hpb]
+	\centering
+	\bicaption[The per-class accuracy in CIFAR-100 results with MobileNetV2]
+	{CIFAR-100结果中各类别准确率}
+	{The per-class accuracy in CIFAR-100 results with MobileNetV2}
+	\label{tab:firstone}
+	\begin{tabular}{@{}lllp{8cm}@{}} \toprule
+		Algorithm & $\lambda$ &Average Accuracy&  Final accuracy on each of the 100 classes ($\%$)\\ \midrule
+		Baseline&$\lambda=0.01$&  44.58& [72.0, 55.0, 42.0, 26.0, 23.0, 58.0, 47.0, 54.0, 41.0, 66.0, 8.0, 39.0, 45.0, 48.0, 19.0, 48.0, 57.0, 74.0, 24.0, 30.0, 65.0, 60.0, 31.0, 61.0, 71.0, 34.0, 32.0, 12.0, 57.0, 32.0, 34.0, 39.0, 40.0, 21.0, 53.0, 28.0, 64.0, 64.0, 37.0, 59.0, 17.0, 67.0, 45.0, 58.0, 3.0, 9.0, 41.0, 54.0, 73.0, 56.0, 23.0, 32.0, 53.0, 62.0, 57.0, 10.0, 68.0, 52.0, 73.0, 61.0, 74.0, 12.0, 48.0, 47.0, 30.0, 21.0, 52.0, 13.0, 72.0, 47.0, 54.0, 66.0, 16.0, 22.0, 24.0, 34.0, 74.0, 18.0, 2.0, 34.0, 25.0, 57.0, 74.0, 34.0, 40.0, 58.0, 37.0, 57.0, 55.0, 50.0, 61.0, 54.0, 38.0, 19.0, 81.0, 50.0, 44.0, 54.0, 27.0, 99.0]\\
+		Algo. \ref{algo:fast}&$\lambda=0.01$&  53.43& [81.0, 65.0, 44.0, 30.0, 35.0, 64.0, 60.0, 61.0, 60.0, 69.0, 22.0, 49.0, 61.0, 47.0, 38.0, 55.0, 59.0, 71.0, 37.0, 39.0, 73.0, 69.0, 52.0, 68.0, 78.0, 42.0, 40.0, 24.0, 63.0, 47.0, 53.0, 46.0, 50.0, 42.0,
+		65.0, 39.0, 72.0, 64.0, 50.0, 73.0, 23.0, 75.0, 44.0, 69.0, 11.0, 32.0, 43.0, 60.0, 88.0, 71.0, 28.0, 50.0, 52.0, 69.0, 65.0, 20.0, 76.0, 63.0, 84.0, 54.0, 77.0, 23.0, 64.0, 48.0, 39.0, 30.0, 61.0, 24.0,
+		86.0, 52.0, 56.0, 72.0, 27.0, 32.0, 30.0, 55.0, 83.0, 32.0, 7.0, 54.0, 33.0, 66.0, 80.0, 45.0, 42.0, 64.0, 50.0, 63.0, 64.0, 59.0, 66.0, 56.0, 53.0, 34.0, 86.0, 61.0, 51.0, 63.0, 37.0, 84.0]
+		\\ \bottomrule
+		\label{tab:cifar100_mobile}
+	\end{tabular}
+\end{table}
+
+We can draw several
+
+
+
+
+
+
 
 

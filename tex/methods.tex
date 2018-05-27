@@ -21,8 +21,15 @@ P_i(Y_i|\mathbf{x_i};\mathbf{W}) = \frac{e^{f_{Y_i}}}{\sum_j e^{f_j}}
 Then, we assume at some moment a new class of data arrives. We denote the new set of images as $\hat{\mathbb{X}}$, consisting of $\hat{\mathbb{N}}$ images $\hat{x_i} \in R^D$, each belonging to a category $\hat{y_i}$. Under the definition of class-incremental learning and the real use case, we are sure this time that all new data belongs to the same new class, and we denote the new class as $N+1$. Hence $\forall \hat{y_i}$, $\hat{y_i}=N+1$. At this time, there will be $N+1$ distinct categories in total. 
 
 Correspondingly, to keep the deep convolutional neural network $\Phi(x_i; \mathbf{W})$ cater to the new situation, we have to do some minimal modifications to the final fully-connected layer and the output layer of the network, to enable it to output probability scores for $N+1$ classes. Note that the modifications described below is different from the network evolving methods described in Related Works section. We only do the minimal modifications to the network output layer to make it eligible for the additional class. We added some weights to make the output size change possible but did not change the network structure, and the added weights are inevitable. But other network evolving papers added much more parameters and complex structures to the original network than just modifying the output layer.
-
-The modifications to the output layer can be formalized as follows. The weights of the layers before the fully connected layer remains unchanged. This indicates that the output vector before the fully connected layer, i.e., the input vector to the fully connected layer is still denoted as $\mathbf{O}$, which is unchanged. Then the fully connected layer is modified as:
+\begin{figure}[!htp]
+	\centering
+	\includegraphics[width=8cm]{newclass.png}
+	\bicaption[Illustration of the final linear layer tranformation for adding a new class]
+	{增加类别时全连接层变化示意图}
+	{Illustration of the final fully-connected layer tranformation for adding a new class. This figure assumes the case from 2 classes to 3 classes. The blue circles represent the feature map from the last layer. The green circles represent the class scores for the old two classes, and the red circle is the newly added class score output. The lines indicate weights, and dashed lines represent new weights to be added for the new class. A softmax layer follows this fully-connected layer.}
+	\label{fig:newclass}
+\end{figure}
+The modifications to the output layer is illustrated in Fig.~\ref{fig:newclass}, and can be formalized as follows. The weights of the layers before the fully connected layer remains unchanged. This indicates that the output vector before the fully connected layer, i.e., the input vector to the fully connected layer is still denoted as $\mathbf{O}$, which is unchanged. Then the fully connected layer is modified as:
 \begin{align}
 f(\mathbf{O}; \hat{\mathbf{W_f}}, \hat{\mathbf{b_f}}) =  \hat{\mathbf{W_f}}\mathbf{O} + \hat{\mathbf{b_f}}
 \end{align}
@@ -111,7 +118,7 @@ This method seems quite straightforward, but has not been seen in any literature
 Our intuition is to utilize hard negative mining techniques commonly used in object detection algorithms. Instead of randomly sampling from the old dataset, we prioritize the harder examples, so that we can minimize the data usage from the old dataset, thus saving significant training time. Depending on the actual inference and training speed ratio on hardware, we provide two algorithms for class incremental learning based on hard negative mining. The first case is when inference time is negligible compared to training time on the same set of images. The second case is when inference time and training time are comparable.
 
 \subsection{Under Fast Inference Speed Condition}
-Let us first consider a simpler case, where inference time can be neglected compared to training time. First, we will explain why inference time can be much faster than training time, to elaborate that this case is indeed possible.
+Let us first consider a simpler case, where inference time can be neglected compared to training time. This case is impossible in real life currently, but we will explain why inference time can be much faster than training time and elaborate that this case is indeed possible in the future on specialized hardware.
 \subsubsection{Model Inference Time analysis}
 In an inference step for a batch of images, we will perform a forward on the deep neural network, and obtain the network's outputs to predict the classes to which the batch of images belong. A inference step typically include only one step:
 \begin{enumerate}
