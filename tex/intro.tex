@@ -85,7 +85,9 @@ Perhaps the most relevant and similar paper with us is the paper ICaRL\cite{rebu
 	\item Training. Each time new data arrives, they train the feature extractor using the previous exemplar sets, and the new samples for the new class. Finally, the exemplar set is updated with a new exemplar set.
 	\item Architecture. They use a convolutional neural network, $\varphi=X\to R^d$ to perform feature extraction. Moreover, they normalize the feature vectors and including the results of any operations on the feature vectors.
 \end{itemize}
-We think ICaRL has several drawbacks, for example, applying the nearest-neighbor approach directly on feature maps does not make much sense, since small objects would yield to smaller average values on feature maps while larger objects are likely to have larger activation values. We show in our experiments that our results outperform ICaRL, with similar training time.
+However, ICaRL has several serious drawbacks, for example, applying the nearest-neighbor approach directly on feature maps does not make much sense, since small objects would yield to smaller average values on feature maps while larger objects are likely to have larger activation values. Moreover, because they only used some exemplars of the old dataset to learn, their model do not have the ability to learn globally good features for all classes.
+
+We show in our experiments that our results outperform ICaRL, with similar training time.
 
 \section{Hard Negative Mining}
 
@@ -259,3 +261,22 @@ ResNext is a state-of-the-art convolutional network in 2017\cite{xie2017aggregat
 Although stated very complicated in the paper, ResNeXt can be simply explained as ResNet combined with group convolution. A group convolution is illustrated in Fig.~\ref{fig:resnext}.  A normal convolution takes all previous feature map dimensions into calculation for every neuron. But in group convolution, feature map dimensions are divided equally into groups. The convolution layer can also be seen as operates on different groups and finally the results of different groups are concatenated together along the dimension.
 
 Group convolution was first used in AlexNet, in order to fit the network in two GPUs. No earlier work has observed that group convolution is able to boost the network performance. In fact many people have tried it, but the performance might be hard to tune. An important property of group convolutions is that it saves computation and parameters by the group number constant. By making heavy use of group convolution, ResNext is able to become much deeper and wider. In such a way, the network capacity becomes huge.
+
+\subsection{ShuffleNet}
+ShuffleNet is a neat and fancy architecture specially designed for mobile devices. Its advantage is that it can maintain relatively high accuracy while using extremely small number of parameters and computation budget. A ShuffleNet block is illustrated in Fig.~\ref{fig:shufflenet}. ShuffleNet is mainly composed of group convolutions, depth-wise separable convolution and the channel shuffle operation. Group convolution is explained earlier in ResNeXt, which has nice properties that it can save lots of computation. Depth-wise separable convolution is introduced in the paper Xception, and later utilized by MobileNet\cite{howard2017mobilenets} to produce a small and efficient network. Thus, ShuffleNet absorbed the advantages of ResNeXt and MobileNet. To prevent the flow of information to be trapped in channel levels, ShuffleNet novelly introduced the channel shuffle operation. Its implementation is extremely easy, because it just needs a transpose operation on the matrix of feature maps. The performance of ShuffleNet exceeded MobileNet by a large margin, and is comparable to the performance of MobileNet V2.
+\begin{figure}[!htp]
+	\centering
+	\includegraphics[width=4cm]{shuffle.png}
+	\bicaption[Illustration of shuffle operation in ShuffleNets]
+	{重组网络中的重组操作示意图}
+	{Illustration of shuffle operation in ShuffleNet. Figure borrowed from \cite{zhang2017shufflenet}.}
+	\label{fig:shuffle}
+\end{figure}
+\begin{figure}[!htp]
+	\centering
+	\includegraphics[width=4cm]{shufflenet.png}
+	\bicaption[Illustration of ShuffleNet blocks]
+	{重组网络的基本结构}
+	{Illustration of ShuffleNet blocks. Figure borrowed from \cite{zhang2017shufflenet}.}
+	\label{fig:shufflenet}
+\end{figure}

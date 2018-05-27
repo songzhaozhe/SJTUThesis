@@ -59,7 +59,7 @@ Considering this problem, a straightforward intuition is to use the training set
 
 Following the intuition, let us consider an extreme case. We will only use the new data, $\hat{\mathbb{X}}$ to further train the network $\Phi(x_i; \hat{\mathbf{W}})$. By only using the new data, we can save lots of computation, because on average the training set size would only be $\frac{1}{N+1}$ of the whole training set $\mathbb{X}\cup \hat{\mathbb{X}}$. Implementing this idea, the result is that the accuracy for the $N+1$ class will quickly rush to $100\%$, while the accuracy for classes $1...N$ will become $0$. This phenomenon can be explained in this way: Since the network can only see the class $N+1$, the loss would be completely biased towards the class $N+1$. Then, the gradients will quickly let the network output very high confidence on class $N+1$, and very low confidence on classes $1...N$. The gap between those confidence will become worse and worse as we train more and more epochs, because there is only training data for class $N+1$. Thus, we should discard this extreme method since it does not work at all.
 
-However, the extreme case gives us some intuition to extend it to a better method. We can consider the other extreme, which is using the entire training set $\mathbb{X}\cup \hat{\mathbb{X}}$ to further train the network $\Phi(x_i; \hat{\mathbf{W}})$. Thus, it is obvious that we can extend these two extreme cases into a unified algorithm, using a hyper-parameter $p$ to control the extent to which we use the old training set $\mathbb{X}$. The algorithm can be defined as in Algorithm \ref{algo:baseline}.
+However, the extreme case gives us some intuition to extend it to a better method. We can consider the other extreme, which is using the entire training set $\mathbb{X}\cup \hat{\mathbb{X}}$ to further train the network $\Phi(x_i; \hat{\mathbf{W}})$. Thus, it is obvious that we can extend these two extreme cases into a unified algorithm, using a hyper-parameter $\lambda$ to control the extent to which we use the old training set $\mathbb{X}$. The algorithm can be defined as in Algorithm \ref{algo:baseline}.
 
 
 \begin{algorithm}
@@ -67,14 +67,14 @@ However, the extreme case gives us some intuition to extend it to a better metho
 	\label{algo:baseline}
 	\begin{algorithmic}
 		\For{$i = 0 \to MAX\_EPOCH$} 
-		\State \textbf{Step 1:} Randomly sample a subset $\mathbf{X}$ from the old training set $\mathbb{X}$, satisfying the size of the subset is $p$ times the size of the old training set, i.e., $|\mathbf{X}| = p|\mathbb{X}|$.
+		\State \textbf{Step 1:} Randomly sample a subset $\mathbf{X}$ from the old training set $\mathbb{X}$, satisfying the size of the subset is $\lambda$ times the size of the old training set, i.e., $|\mathbf{X}| = p|\mathbb{X}|$.
 		\State \textbf{Step 2:} Use the combined training set $\mathbf{X} \cup \hat{\mathbb{X}}$ to train the network for an epoch using Stochastic Gradient Descent. By one epoch, we mean that each image $x_i \in \mathbf{X} \cup \hat{\mathbb{X}}$ is used and used exactly once to train the network.
 		\State \textbf{Step 3:} Use the combined training set $\mathbf{X} \cup \hat{\mathbb{X}}$ to train the network for an epoch using our modified version of Stochastic Gradient Descent, following Equation \ref{sgdrule2}. By one epoch, we mean that each image $x_i \in \mathbf{X} \cup \hat{\mathbb{X}}$ is used and used exactly once to train the network.
 		\EndFor
 	\end{algorithmic}
 \end{algorithm}
 
-In our experiments, we found that this algorithm does not work well, because if $p$ is not large enough, the outputs of the network will still be heavily biased to towards class $N+1$, similar to the extreme case described earlier. This is because the distribution of the number of different classes is different to the original distribution. On the other hand, if we used a large $p$ to balance this issue, the computation cost will be too large since the entire old dataset $\mathbb{X}$ can be very large.
+In our experiments, we found that this algorithm does not work well, because if $\lambda$ is not large enough, the outputs of the network will still be heavily biased to towards class $N+1$, similar to the extreme case described earlier. This is because the distribution of the number of different classes is different to the original distribution. On the other hand, if we used a large $\lambda$ to balance this issue, the computation cost will be too large since the entire old dataset $\mathbb{X}$ can be very large.
 
 To cope with this issue, we further extended the algorithm, by adjusting the rules for Stochastic Gradient Descent. The general intuition is that, we hope to use a weighted loss instead of unweighted loss for different classes, so that the weights can balance the distribution to the original proportion of training image belonging to each class. For example, originally training data for class $N+1$ might only account for $\frac{1}{N+1}$ of the entire training set. Under our algorithm, it is possible that half of the temporary training set $\mathbf{X} \cup \hat{\mathbb{X}}$ belongs to class $N+1$. In this case, the network's outputs will be biased towards class $N+1$, giving more probability to class $N+1$. Then, we hope to give more weight to the loss of classes $1...N$, to adjust for this imbalance. Formally speaking, we can modify the Stochastic Gradient Descent with momentum rule to achieve this goal. The standard SGD with momentum update for one sample of data $x_i$ can be written as:
 \begin{align}
@@ -101,7 +101,7 @@ We modify Equation \ref{sgdrule} into the following:
 \end{align}
 where $y_i$ denote the ground truth label for the sample.
 
-Shown in Equation \ref{sgdrule2}, we multiplied $g_i$ with two coefficients. The coefficient $\frac{1}{p}$, comes from the sampled subset proportion factor $p$, to re-weight the gradients, so that the proportion of every class are re-weighted to original proportion of the whole dataset. However, in our experiments, we found that simply re-weighting to the original proportion is not enough, perhaps because there is more noise coming from samples of classes $1...N$ because relatively fewer samples are used. Therefore, we introduced the hyper-parameter $\beta$, to further adjust the weights.
+Shown in Equation \ref{sgdrule2}, we multiplied $g_i$ with two coefficients. The coefficient $\frac{1}{p}$, comes from the sampled subset proportion factor $\lambda$, to re-weight the gradients, so that the proportion of every class are re-weighted to original proportion of the whole dataset. However, in our experiments, we found that simply re-weighting to the original proportion is not enough, perhaps because there is more noise coming from samples of classes $1...N$ because relatively fewer samples are used. Therefore, we introduced the hyper-parameter $\beta$, to further adjust the weights.
 
 This method seems quite straightforward, but has not been seen in any literature. Because its performance is not very satisfying, we will regard this method as a baseline method in the experiments. Our algorithm in this paper will be based on this baseline method, which will be introduced in the following section.
 \label{baselinesection}
@@ -129,15 +129,15 @@ Suppose there are $|\mathbf{W}|$ parameters in all in a convolutional network. S
 Moreover, the introduction of TensorRT toolkit by NVIDIA enabled even much faster inference speed. They used techniques like Precision Calibration, Layer and Tensor Fusion, Kernel Auto-Tuning, Dynamic Tensor Memory and Multi-Stream Execution, and enabled inference speed to be approximately $20\times$ faster on the same GPU.
 
 \subsubsection{Algorithm}
-Under such circumstances, we design our algorithm as the following steps in Algorithm \ref{algo:fast}. Note that $p$ has the same meaning as in section \ref{baselinesection}.
+Under such circumstances, we design our algorithm as the following steps in Algorithm \ref{algo:fast}. Note that $\lambda$ has the same meaning as in section \ref{baselinesection}.
 
 \begin{algorithm}
 \caption{Class-incremental learning based on Hard Mining under negligible inference time}
 \label{algo:fast}
 	\begin{algorithmic}
 		\For{$i = 0 \to MAX\_EPOCH$} 
-		\State \textbf{Step 1:} Do one round of inference on the old training set $\mathbb{X}$, and record the model's confidence score on the ground truth class. In the meantime, maintain a priority queue \textit{q}, with a maximum size of $\alpha p |\mathbb{X}|$. The priority queue \textit{q} stores the $\alpha p |\mathbb{X}|$ worst performing images. $\alpha$ is a hyper-parameter larger than $1$.
-		\State \textbf{Step 2:} Randomly sample $p$ images from the priority queue \textit{q}. We denote the sampled set of images as $\mathbf{X}$. 
+		\State \textbf{Step 1:} Do one round of inference on the old training set $\mathbb{X}$, and record the model's confidence score on the ground truth class. In the meantime, maintain a priority queue \textit{q}, with a maximum size of $\alpha \lambda |\mathbb{X}|$. The priority queue \textit{q} stores the $\alpha \lambda |\mathbb{X}|$ worst performing images. $\alpha$ is a hyper-parameter larger than $1$.
+		\State \textbf{Step 2:} Randomly sample $\lambda$ images from the priority queue \textit{q}. We denote the sampled set of images as $\mathbf{X}$. 
 		\State \textbf{Step 3:} Use the combined training set $\mathbf{X} \cup \hat{\mathbb{X}}$ to train the network for an epoch using our modified version of Stochastic Gradient Descent, following Equation \ref{sgdrule2}. By one epoch, we mean that each image $x_i \in \mathbf{X} \cup \hat{\mathbb{X}}$ is used and used exactly once to train the network.
 		\EndFor
 	\end{algorithmic}
@@ -157,8 +157,8 @@ The new algorithm can be summarized in Algorithm \ref{algo:slow}.
 	\label{algo:slow}
 	\begin{algorithmic}
 		\For{$i = 0 \to MAX\_EPOCH$} 
-		\State \textbf{Step 1:} Do one round of training on the entire mixed training set $\mathbb{X}\cup \hat{\mathbb{X}}$, and record the model's confidence score on the ground truth class. In the meantime, maintain a priority queue \textit{q}, with a maximum size of $\alpha p |\mathbb{X}|$. The priority queue \textit{q} stores the $\alpha p |\mathbb{X}|$ worst performing images belonging to the old dataset $\mathbb{X}$.
-		\State \textbf{Step 2:} Randomly sample $p$ images from the priority queue \textit{q}. We denote the sampled set of images as $\mathbf{X}$. 
+		\State \textbf{Step 1:} Do one round of training on the entire mixed training set $\mathbb{X}\cup \hat{\mathbb{X}}$, and record the model's confidence score on the ground truth class. In the meantime, maintain a priority queue \textit{q}, with a maximum size of $\alpha \lambda |\mathbb{X}|$. The priority queue \textit{q} stores the $\alpha \lambda |\mathbb{X}|$ worst performing images belonging to the old dataset $\mathbb{X}$.
+		\State \textbf{Step 2:} Randomly sample $\lambda$ images from the priority queue \textit{q}. We denote the sampled set of images as $\mathbf{X}$. 
 		\State \textbf{Step 3:} Use the combined training set $\mathbf{X} \cup \hat{\mathbb{X}}$ to train the network for an epoch using our modified version of Stochastic Gradient Descent, following Equation \ref{sgdrule2}.
 		\EndFor
 	\end{algorithmic}

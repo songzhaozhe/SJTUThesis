@@ -26,11 +26,52 @@ Compared to CIFAR-10, this dataset has the same number of images, so the trainin
 
 In this paper, we follow the evaluation protocol for class-incremental learning introduced in the paper ICaRL\cite{rebuffi2017icarl}. Before that paper, there does not exist any agreed benchmark protocol for evaluating class-incremental learning methods. In the protocol, we will use a multi-class image classification dataset like CIFAR-10 and CIFAR-100. Given such a dataset, the classes will be arranged in a fixed random order. To compare between each method, each method will be trained in a class-incremental way on the gradually available training data. After adding each class or adding a batch of classes at a time, the classifier will be tested on the test data part of the dataset, considering only the classes that are already been learned. Doing this, we can obtain a curve of the classification accuracies after each batch of incremented classes. We will repeat this procedure for 10 times with different random class orders and average over the curve.
 
+\section{Experimental Setup}
+
+In the experiments, we will evaluate our method on two representative network structures: ResNet and ShuffleNet. ResNet is the typical architecture in deep convolutional networks, while ShuffleNet is a typical network for deep learning in mobile devices with limited computation budget. By showing that these two network exhibits similar trends, we prove the robustness of our method on different kinds of deep learning network structures. 
+
+In the following experiments, we will set the hyper-parameter $\alpha$ as 2. The hyper-parameter $\beta$ is set to 1. The learning rate, if not specified, would be 0.1 in the first half of epochs, and 0.01 in the second half of epochs. The weight decay is set to 0.0001. The momentum for the momentum-based Stochastic Gradient Descent optimizer is set to 0.9. The max epoch parameter to be used after adding each class is set to 2. Note that for $\lambda=1$ in Algorithm \ref{algo:slow}, there it will be equivalent to training for 4 epochs, because one epoch is trained in Step 1 and one epoch is trained in Step 2.
+
+Unless specified, we present the results using Algorithm \ref{algo:slow}, because our experiment machines usually do not have such fast inference speed.
+
+\subsection{Performance on CIFAR-100 Dataset using ResNet32}
+
+We first test the performance using ResNet. Since ICaRL used ResNet32 as their feature extractor, we use ResNet32 too, where the number 32 refers to the number of layers. We first present the results on CIFAR-100 Dataset, because the relevant paper, ICaRL, did not test their results on CIFAR-10. We incremented one class at a time. But ICaRL worked poorly when incrementing one class at a time perhaps due to the preferences of their algorithm, so we used their results when every time a batch of 10 new class of data arrives. 
+
+\begin{figure}[!htp]
+	\centering
+	\includegraphics[width=12cm]{cifar100.png}
+	\bicaption[Performance comparison on CIFAR-100 Dataset]
+	{CIFAR-100数据集上表现对比}
+	{Performance comparison on CIFAR-100 Dataset}
+	\label{fig:cifar100}从
+\end{figure}
 
 
+As shown in Fig.~\ref{fig:cifar100}, our algorithm outperform ICaRL by a large margin. Our parameter $\lambda$, controls the number of hard examples chosen to train the model in Step 2. In the most extreme case $\lambda = 1$, the accuracy of our algorithm becomes very close to the performance upper bound when all 100 classes of data are used to train the deep neural network from scratch. By using $\lambda=0.01$, we are using approximately $1/2$ computation compared to $\lambda=1$, because by comparing the amount data used by Step 1 and Step 2 in total, we can write the comparison by the ratio $\frac{1+1}{1+0.01} \approx 2$. The smaller amount of computation leads to slightly worse performance. As revealed, with higher $\lambda$, we can obtain higher accuracy, but spending more computation time. With lower $\lambda$, we save more computation time, by will degrade some accuracy.
 
+In the beginning when there are fewer than 30 classes, the accuracy of ICaRL algorithm is higher than us. We suspect that they might have used a larger network than us, so they can have higher accuracy before incremental learning happens when there are initially 10 classes. Another reason might be their classification algorithm does better when the class number is low, because they used a quite complicated classification algorithm. This problem does not matter too much, because the most important aspect in incremental learning is the trend of the curve, and not the initial accuracy.
 
+There is also an interesting trend shown in our curves. During the 10 to 25 classes, the accuracy of our algorithm first drops a little, and then goes up. The reason why the accuracy first drops is that it is easier for the neural network to correctly classify fewer classes. But at the same time, more classes provide stronger regularization power, so the network can learn more general features and does not overfit. Therefore, the accuracy goes up a little. This phenomenon is similar to the discoveries in multi-task learning, joint training, etc. 
 
-
+Average values might not truly reflect the knowledge the model has learned. Next, we want to see whether the accuracies of each class are high enough, so that the network really learned knowledge for every class, instead of biasing towards specific classes. Shown in Table \ref{tab:cifar100}, we do not see obvious bias for specific classes using our algorithm. This indicates that our algorithm is able to learn knowledge for every class effectively. Note that the accuracy varies quite a lot for different classes, from $45\%$ to $85\%$. This is because the difficulty of recognizing every class is different.
+\begin{table}[!hpb]
+	\centering
+	\bicaption[指向一个表格的表目录索引]
+	{CIFAR-100结果中各类别准确率}
+	{The per-class accuracy in CIFAR-100 results}
+	\label{tab:firstone}
+	\begin{tabular}{@{}lp{10cm}@{}} \toprule
+		Case &  Final accuracy on each of the 100 classes ($\%$)\\ \midrule
+		Model trained from scratch  &[83.0, 82.0, 51.0, 48.0, 52.0, 73.0, 77.0, 72.0, 80.0, 79.0, 57.0, 46.0, 78.0, 62.0, 63.0, 75.0, 73.0, 78.0, 62.0, 61.0, 80.0, 86.0, 63.0, 78.0, 79.0, 58.0, 73.0, 59.0, 76.0, 71.0, 65.0, 61.0, 61.0, 66.0,
+		75.0, 52.0, 75.0, 79.0, 54.0, 81.0, 64.0, 82.0, 75.0, 72.0, 49.0, 59.0, 49.0, 61.0, 93.0, 84.0, 51.0, 70.0, 64.0, 86.0, 77.0, 41.0, 83.0, 78.0, 83.0, 66.0, 83.0, 66.0, 73.0, 70.0, 51.0, 53.0, 76.0, 58.0,
+		87.0, 73.0, 63.0, 76.0, 46.0, 60.0, 57.0, 80.0, 86.0, 62.0, 64.0, 68.0, 51.0, 76.0, 86.0, 60.0, 66.0, 77.0, 69.0, 83.0, 74.0, 81.0, 79.0, 75.0, 58.0, 53.0, 91.0, 66.0, 68.0, 74.0, 47.0, 64.0]\\
+		$\lambda=1$  &[82.0, 77.0, 62.0, 45.0, 53.0, 73.0, 75.0, 60.0, 86.0, 80.0, 52.0, 43.0, 74.0, 59.0, 69.0, 66.0, 76.0, 82.0, 57.0, 64.0, 81.0, 80.0, 66.0, 83.0, 81.0, 59.0, 65.0, 67.0, 80.0, 68.0, 66.0, 57.0, 67.0, 66.0, 72.0, 53.0, 79.0, 67.0, 60.0, 88.0, 60.0, 82.0, 71.0, 76.0, 46.0, 53.0, 50.0, 52.0, 92.0, 84.0, 49.0, 75.0, 69.0, 88.0, 83.0, 53.0, 81.0, 80.0, 79.0, 66.0, 86.0, 68.0, 72.0, 55.0, 54.0, 57.0, 67.0, 60.0, 88.0, 76.0, 63.0, 79.0, 42.0, 49.0, 50.0, 85.0, 88.0, 62.0, 53.0, 71.0, 43.0, 74.0, 85.0, 51.0, 68.0, 81.0, 74.0, 76.0, 75.0, 81.0, 81.0, 70.0, 54.0, 59.0, 84.0, 70.0, 55.0, 68.0, 48.0, 68.0]
+		\\
+		$\lambda=0.01$  & [85.0, 82.0, 59.0, 45.0, 57.0, 69.0, 73.0, 71.0, 80.0, 85.0, 53.0, 48.0, 77.0, 64.0, 56.0, 67.0, 72.0, 85.0, 63.0, 61.0, 81.0, 85.0, 65.0, 71.0, 82.0, 58.0, 62.0, 54.0, 79.0, 65.0, 53.0, 72.0, 71.0, 62.0, 72.0, 45.0, 76.0, 71.0, 60.0, 84.0, 61.0, 80.0, 68.0, 68.0, 40.0, 46.0, 35.0, 49.0, 93.0, 77.0, 49.0, 65.0, 65.0, 87.0, 83.0, 47.0, 83.0, 73.0, 75.0, 66.0, 85.0, 67.0, 61.0, 59.0, 34.0, 53.0, 74.0, 51.0, 85.0, 79.0, 59.0, 75.0, 41.0, 37.0, 50.0, 81.0, 83.0, 57.0, 54.0, 64.0, 45.0, 74.0, 84.0, 62.0, 67.0, 78.0, 68.0, 78.0, 76.0, 80.0, 74.0, 79.0, 45.0, 49.0, 89.0, 63.0, 63.0, 59.0, 48.0, 70.0]
+		 \\
+\label{tab:cifar100}
+	\end{tabular}
+\end{table}
 
 
