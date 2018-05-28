@@ -52,7 +52,7 @@ As shown in Fig.~\ref{fig:cifar100}, our algorithm outperform ICaRL by a large m
 
 In the beginning when there are fewer than 30 classes, the accuracy of ICaRL algorithm is higher than us. We suspect that they might have used a larger network than us, so they can have higher accuracy before incremental learning happens when there are initially 10 classes. Another reason might be their classification algorithm does better when the class number is low, because they used a quite complicated classification algorithm. This problem does not matter too much, because the most important aspect in incremental learning is the trend of the curve, and not the initial accuracy.
 
-There is also an interesting trend shown in our curves. During the 10 to 25 classes, the accuracy of our algorithm first drops a little, and then goes up. The reason why the accuracy first drops is that it is easier for the neural network to correctly classify fewer classes. But at the same time, more classes provide stronger regularization power, so the network can learn more general features and does not overfit. Therefore, the accuracy goes up a little. This phenomenon is similar to the discoveries in multi-task learning, joint training, etc. 
+There is also an interesting trend shown in our curves. During the 10 to 25 classes, the accuracy of our algorithm first drops a little, then goes up and finally went down. The reason why the accuracy first drops is that it is easier for the neural network to correctly classify fewer classes. But at the same time, more classes provide stronger regularization power, so the network can learn more general features and does not overfit. Therefore, the accuracy goes up a little. Finally, too many classes bring difficulty to the network, thus the accuracy dropped again. This phenomenon is similar to the discoveries in multi-task learning, joint training, etc. 
 
 Average values might not truly reflect the knowledge the model has learned. Next, we want to see whether the accuracies of each class are high enough, so that the network really learned knowledge for every class, instead of biasing towards specific classes. Shown in Table \ref{tab:cifar100}, we do not see obvious bias for specific classes using our algorithm. This indicates that our algorithm is able to learn knowledge for every class effectively. Note that the accuracy varies quite a lot for different classes, from $45\%$ to $85\%$. This is because the difficulty of recognizing every class is different.
 \begin{table}[!hpb]
@@ -133,7 +133,9 @@ We also tested our method on the CIFAR-10 Dataset. The setting is the same, i.e.
 
 
 
-We can see that the curves are very similar to the curves compared to CIFAR-100. This shows the robustness of our method under different datasets. It is worth noting that this time our model performs further worse than the accuracy upper bound. This is due to lack of training time, since training 10 class from scratch takes 160 epochs, while we only used at most $10 \times 4 = 40$ epochs. We believe our curve would be higher when we increased the training time.
+We can see that the curves are very similar to the curves compared to CIFAR-100. The same pattern with regards to $\lambda$ can be seen. When $\lambda=1$, the accuracy is higher, but when $\lambda=0.01$, the accuracy becomes lower. This shows the robustness of our method under different datasets. The accuracy can reach $98\%$ when there are only two classes, because binary classification is much easier. Then the accuracy begins to drop. At the 6-th class, the accuracy start to rise, because with more classes, the overfitting issue gets ameliorated due to more training data, although from different classes. The more training data enabled the deep neural network to learn more general features. This also indicates that our network is able to learn more global features when more classes are added, instead of sticking to the old features. Because if the network can only reuse the old features, the accuracy can only go lower and lower.
+
+It is worth noting that this time our model performs further worse than the accuracy upper bound. This is due to lack of training time, since training 10 class from scratch takes 160 epochs, while we only used at most $10 \times 4 = 40$ epochs. We believe our curve would be higher when we increased the training time.
 \begin{figure}[!htp]
 	\centering
 	\includegraphics[width=12cm]{cifar10-resnet.png}
@@ -150,12 +152,12 @@ We can see that the curves are very similar to the curves compared to CIFAR-100.
 	{Evaluation result on CIFAR-10 Dataset with MobileNetV2}
 	\label{fig:cifar10-mobilenetv2}
 \end{figure}
-We also show tested the per-class accuracy in Table \ref{cifar10_resnet} and Table \ref{cifar10_mobilenetv2}, to see that our model learns knowledge for every class.
+We also show tested the per-class accuracy in Table \ref{tab:cifar10_resnet} and Table \ref{tab:cifar10_mobilenetv2}, to see that our model learns knowledge for every class.
 \begin{table}[!hpb]
 	\centering
-	\bicaption[The per-class accuracy in CIFAR-10 results for ResNet20]
-	{ResNet20在CIFAR-10结果中各类别准确率}
-	{The per-class accuracy in CIFAR-10 results for ResNet20}
+	\bicaption[The per-class accuracy in CIFAR-10 results for ResNet32]
+	{ResNet32在CIFAR-10结果中各类别准确率}
+	{The per-class accuracy in CIFAR-10 results for ResNet32}
 	\label{tab:firstone}
 	\begin{tabular}{@{}lp{10cm}@{}} \toprule
 		Case &  Final accuracy on each of the 100 classes ($\%$)\\ \midrule
@@ -185,34 +187,30 @@ We also show tested the per-class accuracy in Table \ref{cifar10_resnet} and Tab
 \subsection{Under negligible inference speed}
 We also tested our Algorithm \ref{algo:fast} under negligible inference speed. We used ResNet32 to evaluate. Since time and computational resource is limited, we are unable plot the whole curve. As an alternative, we first train the model using the first 99 classes from scratch. Then, we add the 100-th class and perform our incremental learning algorithm. We will compare the average accuracy for 100 classes, as well as per-class accuracy to evaluate our algorithm.
 
-We compared our algorithm with the baseline algorithm Algorithm \ref{algo:baseline}. For all tests, we used a constant learning rate of $0.01$. The max epoch parameter is set to 4. However, we should note that, since the time of Step 1 can be neglected, the time consumption is much more smaller. Compared to training on the full epoch, our speed up ratio can be calculated as
-\begin{align}
-\eta = \frac{99+1}{\lambda \times 99 + 1} \approx \frac{1}{\lambda}
-\end{align}
-Thus, the speed up is almost proportional to $1/\lambda$. In the following, we tested the results for $\lambda=0.1$ and $\lambda=0.01$.
+We compared our algorithm with the baseline algorithm Algorithm \ref{algo:baseline}. For all tests, we used a constant learning rate of $0.01$. The max epoch parameter is set to 4. However, we should note that, since the time of Step 1 can be neglected, the time consumption is much more smaller. 
+
+In the following, we tested the results for $\lambda=0.1$ and $\lambda=0.01$. The results are shown in Table \ref{tab:fast0.1} and Table \ref{tab:fast0.01}.
 
 \begin{table}[!hpb]
 	\centering
-	\bicaption[The results]
-	{CIFAR-100结果中各类别准确率}
-	{The per-class accuracy in CIFAR-100 results with MobileNetV2}
-	\label{tab:firstone}
+	\bicaption[The results of Algorithm \ref{algo:baseline} and \ref{algo:fast} on CIFAR-100 under $\lambda=0.1$]
+	{算法\ref{algo:baseline}和\ref{algo:fast}在CIFAR-100的结果}
+	{The results of Algorithm \ref{algo:baseline} and \ref{algo:fast} on CIFAR-100 under $\lambda=0.1$. We first trained the model on the first 99 classes from scratch. Then we added the 100-th class and performed the incremental learning algorithm.}
 	\begin{tabular}{@{}lllp{8cm}@{}} \toprule
 		Algorithm & $\lambda$ &Avg. Accuracy&  Final accuracy on each of the 100 classes ($\%$)\\ \midrule
-		Baseline&$\lambda=0.01$&  44.58& [72.0, 55.0, 42.0, 26.0, 23.0, 58.0, 47.0, 54.0, 41.0, 66.0, 8.0, 39.0, 45.0, 48.0, 19.0, 48.0, 57.0, 74.0, 24.0, 30.0, 65.0, 60.0, 31.0, 61.0, 71.0, 34.0, 32.0, 12.0, 57.0, 32.0, 34.0, 39.0, 40.0, 21.0, 53.0, 28.0, 64.0, 64.0, 37.0, 59.0, 17.0, 67.0, 45.0, 58.0, 3.0, 9.0, 41.0, 54.0, 73.0, 56.0, 23.0, 32.0, 53.0, 62.0, 57.0, 10.0, 68.0, 52.0, 73.0, 61.0, 74.0, 12.0, 48.0, 47.0, 30.0, 21.0, 52.0, 13.0, 72.0, 47.0, 54.0, 66.0, 16.0, 22.0, 24.0, 34.0, 74.0, 18.0, 2.0, 34.0, 25.0, 57.0, 74.0, 34.0, 40.0, 58.0, 37.0, 57.0, 55.0, 50.0, 61.0, 54.0, 38.0, 19.0, 81.0, 50.0, 44.0, 54.0, 27.0, 99.0]\\
-		Algo. \ref{algo:fast}&$\lambda=0.01$&  53.43& [81.0, 65.0, 44.0, 30.0, 35.0, 64.0, 60.0, 61.0, 60.0, 69.0, 22.0, 49.0, 61.0, 47.0, 38.0, 55.0, 59.0, 71.0, 37.0, 39.0, 73.0, 69.0, 52.0, 68.0, 78.0, 42.0, 40.0, 24.0, 63.0, 47.0, 53.0, 46.0, 50.0, 42.0,
-		65.0, 39.0, 72.0, 64.0, 50.0, 73.0, 23.0, 75.0, 44.0, 69.0, 11.0, 32.0, 43.0, 60.0, 88.0, 71.0, 28.0, 50.0, 52.0, 69.0, 65.0, 20.0, 76.0, 63.0, 84.0, 54.0, 77.0, 23.0, 64.0, 48.0, 39.0, 30.0, 61.0, 24.0,
-		86.0, 52.0, 56.0, 72.0, 27.0, 32.0, 30.0, 55.0, 83.0, 32.0, 7.0, 54.0, 33.0, 66.0, 80.0, 45.0, 42.0, 64.0, 50.0, 63.0, 64.0, 59.0, 66.0, 56.0, 53.0, 34.0, 86.0, 61.0, 51.0, 63.0, 37.0, 84.0]
+		Baseline&$\lambda=0.1$&  65.43& [87.0, 81.0, 47.0, 48.0, 54.0, 71.0, 70.0, 67.0, 79.0, 78.0, 46.0, 50.0, 75.0, 54.0, 61.0, 69.0, 71.0, 84.0, 51.0, 56.0, 80.0, 85.0, 58.0, 75.0, 76.0, 52.0, 58.0, 49.0, 75.0, 63.0, 58.0, 65.0, 59.0, 65.0, 74.0, 45.0, 73.0, 74.0, 59.0, 81.0, 52.0, 78.0, 70.0, 80.0, 35.0, 51.0, 53.0, 61.0, 93.0, 81.0, 43.0, 68.0, 67.0, 78.0, 79.0, 29.0, 80.0, 76.0, 80.0, 64.0, 83.0, 57.0, 67.0, 65.0, 44.0, 52.0, 71.0, 43.0, 80.0, 62.0, 62.0, 79.0, 42.0, 52.0, 50.0, 78.0, 87.0, 53.0, 29.0, 67.0, 57.0, 64.0, 87.0, 50.0, 63.0, 78.0, 63.0, 72.0, 71.0, 83.0, 81.0, 73.0, 58.0, 54.0, 90.0, 66.0, 65.0, 80.0, 48.0, 76.0]\\
+		Algo. \ref{algo:fast}&$\lambda=0.1$&  66.18& [83.0, 81.0, 52.0, 45.0, 48.0, 69.0, 76.0, 67.0, 77.0, 82.0, 48.0, 46.0, 73.0, 61.0, 57.0, 77.0, 67.0, 83.0, 55.0, 54.0, 83.0, 78.0, 64.0, 77.0, 80.0, 49.0, 63.0, 52.0, 74.0, 61.0, 65.0, 66.0, 60.0, 66.0,
+		79.0, 48.0, 76.0, 75.0, 57.0, 81.0, 53.0, 85.0, 74.0, 82.0, 36.0, 52.0, 42.0, 63.0, 93.0, 80.0, 48.0, 70.0, 57.0, 84.0, 75.0, 27.0, 80.0, 78.0, 87.0, 66.0, 84.0, 61.0, 67.0, 64.0, 44.0, 53.0, 69.0, 45.0,
+		88.0, 73.0, 63.0, 79.0, 37.0, 51.0, 46.0, 75.0, 87.0, 51.0, 45.0, 71.0, 59.0, 66.0, 87.0, 54.0, 64.0, 76.0, 65.0, 73.0, 70.0, 86.0, 82.0, 74.0, 48.0, 54.0, 93.0, 71.0, 64.0, 75.0, 52.0, 65.0]
 		\\ \bottomrule
-		\label{tab:cifar100_mobile}
+		\label{tab:fast0.1}
 	\end{tabular}
 \end{table}
 \begin{table}[!hpb]
 	\centering
-	\bicaption[The per-class accuracy in CIFAR-100 results with MobileNetV2]
-	{CIFAR-100结果中各类别准确率}
-	{The per-class accuracy in CIFAR-100 results with MobileNetV2}
-	\label{tab:firstone}
+	\bicaption[The results of Algorithm \ref{algo:baseline} and \ref{algo:fast} on CIFAR-100 under $\lambda=0.01$]
+	{算法\ref{algo:baseline}和\ref{algo:fast}在CIFAR-100的结果}
+	{The results of Algorithm \ref{algo:baseline} and \ref{algo:fast} on CIFAR-100 under $\lambda=0.01$. We first trained the model on the first 99 classes from scratch. Then we added the 100-th class and performed the incremental learning algorithm.}
 	\begin{tabular}{@{}lllp{8cm}@{}} \toprule
 		Algorithm & $\lambda$ &Average Accuracy&  Final accuracy on each of the 100 classes ($\%$)\\ \midrule
 		Baseline&$\lambda=0.01$&  44.58& [72.0, 55.0, 42.0, 26.0, 23.0, 58.0, 47.0, 54.0, 41.0, 66.0, 8.0, 39.0, 45.0, 48.0, 19.0, 48.0, 57.0, 74.0, 24.0, 30.0, 65.0, 60.0, 31.0, 61.0, 71.0, 34.0, 32.0, 12.0, 57.0, 32.0, 34.0, 39.0, 40.0, 21.0, 53.0, 28.0, 64.0, 64.0, 37.0, 59.0, 17.0, 67.0, 45.0, 58.0, 3.0, 9.0, 41.0, 54.0, 73.0, 56.0, 23.0, 32.0, 53.0, 62.0, 57.0, 10.0, 68.0, 52.0, 73.0, 61.0, 74.0, 12.0, 48.0, 47.0, 30.0, 21.0, 52.0, 13.0, 72.0, 47.0, 54.0, 66.0, 16.0, 22.0, 24.0, 34.0, 74.0, 18.0, 2.0, 34.0, 25.0, 57.0, 74.0, 34.0, 40.0, 58.0, 37.0, 57.0, 55.0, 50.0, 61.0, 54.0, 38.0, 19.0, 81.0, 50.0, 44.0, 54.0, 27.0, 99.0]\\
@@ -220,11 +218,11 @@ Thus, the speed up is almost proportional to $1/\lambda$. In the following, we t
 		65.0, 39.0, 72.0, 64.0, 50.0, 73.0, 23.0, 75.0, 44.0, 69.0, 11.0, 32.0, 43.0, 60.0, 88.0, 71.0, 28.0, 50.0, 52.0, 69.0, 65.0, 20.0, 76.0, 63.0, 84.0, 54.0, 77.0, 23.0, 64.0, 48.0, 39.0, 30.0, 61.0, 24.0,
 		86.0, 52.0, 56.0, 72.0, 27.0, 32.0, 30.0, 55.0, 83.0, 32.0, 7.0, 54.0, 33.0, 66.0, 80.0, 45.0, 42.0, 64.0, 50.0, 63.0, 64.0, 59.0, 66.0, 56.0, 53.0, 34.0, 86.0, 61.0, 51.0, 63.0, 37.0, 84.0]
 		\\ \bottomrule
-		\label{tab:cifar100_mobile}
+		\label{tab:fast0.01}
 	\end{tabular}
 \end{table}
 
-We can draw several
+We can have several findings in the results. First of all, we can see that our proposed algorithm has much better performance than the straightforward baseline algorithm. The gap becomes larger, when $\lambda$ is smaller. This is because when old training data are used fewer, every example should be representative enough to train the network so that the network will not forget the old classes. The baseline algorithm chooses them randomly, so they cannot catch the most important and hard points of recognizing a class. By utilizing hard mining, we select the hardest examples, so that the model will be always reminded of the old classes and not forget it. Secondly, the baseline algorithm will easily overfit to the 100-th class. When $\lambda=0.01$, the accuracy of the 100-th class becomes $99\%$. Surely, this abnormal accuracy on the 100-th class will damage the accuracy on the first 99 classes. This phenomenon is caused by the imbalanced distribution on the training set, because most training data are for the 100-th class. When we select the hardest examples in our proposed algorithm, the hard examples can automatically balance the examples for the new class, thus preventing the network to overfit on the 100-th class.
 
 
 

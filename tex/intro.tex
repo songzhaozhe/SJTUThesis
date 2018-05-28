@@ -76,7 +76,7 @@ Joint training is likely to provide the best performance, given that we care bot
 Therefore, many other methods are proposed in recent years to remedy this problem. Learning without forgetting\cite{li2017learning} is a famous paper working on sequential multi-task learning without forgetting old tasks.
 Utilizing the distillation loss proposed by Hinton\cite{hinton2015distilling}, they proposed to use distillation loss in addition to classification loss for new tasks. In this way, past data for the old task can be completely discarded. It seems to relate closely to incremental learning, especially by the paper name. However, this algorithm cannot fit well for incremental learning for the following reasons. First, in incremental learning, there is only one task in whole, and the only change that might happen to the output of the network is to add additional outputs for new class scores. Hence from beginning to end, only one softmax classifier will be used in incremental learning setting. Then it will be difficult to use both distillation loss and classification loss, because there is only one softmax function. One idea is to still apply the distillation loss on old classes, and train only with data for new classes. This option leads to very poor and unstable performance, because the old data is not used at all. Moreover, the balancing factor $\lambda$ between distillation loss and classification loss is hard to tune. Worse, it is impossible to apply the algorithm when only one new class arrives, then the model would explode because there is always only one correct class: the new class.
 
-Due to the difficult reasons, there are also several papers that tries from a different perspective. They try to evolve the network dynamically when new data or task arrives, like \cite{yoon2017lifelong,rosenfeld2017incremental,sarwar2017incremental,rusu2016progressive}. By evolving the network, they manage to keep the outputs of the original data unchanged or little changed, so that new parameters can be learned for new data, and the accuracy of old data can be maintained by the old parameters. They carefully design the network transformation such that the output for past data remain the same. However, these methods have obvious drawbacks in common. First of all, the network will become extremely large if we continue to add new data. Secondly, to ensure the performance on old data do not deteriorate, the older parameters will remain constant or change little. Then, the old features might be very weak and biased, because they are only trained on a smaller percent of data. Better global features can only be learned by newer parameters. In this case, the network will become very redundant, worsening the network capacity exploding problem.
+Due to the difficult reasons, there are also several papers that tries from a different perspective. They try to evolve the network dynamically when new data or task arrives, like the papers \parencite{yoon2017lifelong,rosenfeld2017incremental,sarwar2017incremental,rusu2016progressive}. By evolving the network, they manage to keep the outputs of the original data unchanged or little changed, so that new parameters can be learned for new data, and the accuracy of old data can be maintained by the old parameters. They carefully design the network transformation such that the output for past data remain the same. However, these methods have obvious drawbacks in common. First of all, the network will become extremely large if we continue to add new data. Secondly, to ensure the performance on old data do not deteriorate, the older parameters will remain constant or change little. Then, the old features might be very weak and biased, because they are only trained on a smaller percent of data. Better global features can only be learned by newer parameters. In this case, the network will become very redundant, worsening the network capacity exploding problem.
 
 
 Perhaps the most relevant and similar paper with us is the paper ICaRL\cite{rebuffi2017icarl}. ICaRL\cite{rebuffi2017icarl} is a recent proposal for class-incremental image classification systems, that maintain only a limited set of exemplars for old data. Their algorithm is designed specially for class-incremental systems, that is, every time one or several new classes of data arrives. This is exactly the same use case with our goal, since we want to learn new types of merchandise every time. We break down their algorithm into three aspects to briefly explain it:
@@ -96,6 +96,16 @@ Hard negative mining refers to the idea of selectively choosing samples to train
 There are two hard negative mining methods commonly use. The first algorithm is used specially when optimizing SVMs. In the algorithm, it maintains a dynamic set of examples and changes between training the SVM to convergence in the dynamic set, and updating the dynamic set by adding some examples and removing some others in a specific way\cite{felzenszwalb2010object}. Under SVM, they assume that an example is easy if that example falls beyond the current SVM model's margin. Conversely, they regard an example as hard if it violate the margin of the current model. Importantly, the dynamic set is a small subset of the whole training set, so that the method can save computation.
 
 The second way is applied for non SVM models. It usually starts with a set of positive examples and a randomly sampled set of negative examples. As the model learns, it gradually prioritize the sampling of harder examples, which means the examples that the model predicts poorly. This kind if method is the method we will refer to in our algorithm. However, it is worth noting that the kind of method is rather empirical and does not have any convergence guarantees. Most people are using this technique because it behaves empirically well, so do us.
+
+For example, Shrivastava\cite{shrivastava2016training} proposed to incorporate an online hard negative mining component into Fast-RCNN, and gained several significant advantages. First, it greatly and consistently improved the mean average precision. Second, it removes the need for Faster-RCNN to use many heuristics and hyper-parameters. Hard negative mining made the overall algorithm simpler to tune. The pipeline they proposed can be shown in Fig.~\ref{fig:ohnm}.
+\begin{figure}[!htp]
+	\centering
+	\includegraphics[width=10cm]{ohnm.png}
+	\bicaption[Illustration of online hard negative mining used in Fast-RCNN]
+	{在Fast-RCNN运用困难负样本学习的示意图}
+	{Illustration of online hard negative mining\cite{shrivastava2016training} used in Fast-RCNN. Figure borrowed from \parencite{shrivastava2016training}}
+	\label{fig:ohnm}
+\end{figure}
 
 In 2017, researchers at Facebook proposed a better algorithm to substitute the hard negative mining step in object detection, using a hand-designed loss function called focal loss\cite{lin2017focal}. This loss function automatically enlarges the loss for harder examples that the model is performing poorly, and minimizes the loss for easier examples. As a result, hard negative mining step is no longer needed because the focal loss function automatically adjusts the weights for different examples. However, the focal loss function is not suitable for the incremental learning problem we are considering here. It is because we wish to use as much old examples as possible to save computation time, which is in contradiction with focal loss detection algorithm that uses all examples in the training set to train.
 
@@ -170,7 +180,7 @@ Based on the single neuron, we are able to stack many of them to form a multi-la
 	\includegraphics[width=9cm]{nn.png}
 	\bicaption[Illustration of Neural Network]
 	{多层神经网络示意图}
-	{An example of multi-layer neural network. Figure borrowed from \cite{lecun2015deep}}
+	{An example of multi-layer neural network. Figure borrowed from \parencite{lecun2015deep}}
 	\label{fig:nn}
 \end{figure}
 This paper will be mainly using convolutional neural networks for image recognition. A convolutional layer is different in the mathematical operation, but can feed-forward and back-propagate in the same way. A typical convolutional neural network consists of convolutional layers, pooling layers and fully-connected layers. Fully-connected layer is the same as a single layer neural network. Convolutional layers and pooling layers are illustrated in Fig.~\ref{fig:convolve} and Fig.~\ref{fig:pooling} respectively. 
@@ -200,7 +210,7 @@ Deep residual networks\cite{he2016deep}(ResNet) are proposed by Kaiming He in 20
 	\includegraphics[width=8cm]{resnet.png}
 	\bicaption[Illustration of Residual Blocks]
 	{残差结构示意图}
-	{Illustration of Residual Blocks. Figure borrowed from \cite{he2016deep}.}
+	{Illustration of Residual Blocks. Figure borrowed from \parencite{he2016deep}.}
 	\label{fig:resnet}
 \end{figure}
 
@@ -219,7 +229,7 @@ Deep residual networks brought a storm in the field of machine learning. Althoug
 	\includegraphics[width=4cm]{resnetv2.png}
 	\bicaption[Illustration of Pre-activation Residual Blocks]
 	{预激活残差结构示意图}
-	{Illustration of Pre-activation Residual Blocks. Figure borrowed from \cite{he2016identity}.}
+	{Illustration of Pre-activation Residual Blocks. Figure borrowed from \parencite{he2016identity}.}
 	\label{fig:resnetv2}
 \end{figure}
 One year later, the same authors published another paper\cite{he2016identity} and discussed different structures of residual blocks. They improved the residual block of the original paper, and the best residual block is shown in Fig.~\ref{fig:resnetv2}, called the pre-activation structure. Using the better residual block, they are able to train a network much more deeper, up to one thousand two hundred and two layers. They are the first to design a network that operates on more than one thousand layer while also improving accuracy. This version of deep residual network is also called ResNet V2 in literature. 
@@ -229,7 +239,7 @@ However, later comments reveal that ResNet V2 actually does not have such signif
 \subsection{DenseNet}
 \begin{figure}[!htp]
 	\centering
-	\includegraphics[width=16cm]{densenet.png}
+	\includegraphics[width=16cm,height=3cm]{densenet.png}
 	\bicaption[Illustration of DenseNet]
 	{密集链接网络示意图}
 	{Illustration of DenseNet. Figure borrowed from \cite{huang2017densely}.}
@@ -252,10 +262,10 @@ However, there are also critics that the Densely Connected Convolutional Network
 ResNext is a state-of-the-art convolutional network in 2017\cite{xie2017aggregated}. When combined with Squeeze-and-Excite blocks, it is still the current state-of-the-art network architecture.
 \begin{figure}[!htp]
 	\centering
-	\includegraphics[width=8cm]{resnext.png}
+	\includegraphics[width=10cm]{resnext.png}
 	\bicaption[Illustration of ResNeXt blocks]
 	{聚合变换残差网络示意图}
-	{Illustration of ResNeXt blocks. Figure borrowed from \cite{xie2017aggregated}.}
+	{Illustration of ResNeXt blocks. Figure borrowed from \parencite{xie2017aggregated}.}
 	\label{fig:resnext}
 \end{figure}
 Although stated very complicated in the paper, ResNeXt can be simply explained as ResNet combined with group convolution. A group convolution is illustrated in Fig.~\ref{fig:resnext}.  A normal convolution takes all previous feature map dimensions into calculation for every neuron. But in group convolution, feature map dimensions are divided equally into groups. The convolution layer can also be seen as operates on different groups and finally the results of different groups are concatenated together along the dimension.
@@ -269,7 +279,7 @@ ShuffleNet is a neat and fancy architecture specially designed for mobile device
 	\includegraphics[width=4cm]{shuffle.png}
 	\bicaption[Illustration of shuffle operation in ShuffleNets]
 	{重组网络中的重组操作示意图}
-	{Illustration of shuffle operation in ShuffleNet. Figure borrowed from \cite{zhang2017shufflenet}.}
+	{Illustration of shuffle operation in ShuffleNet. Figure borrowed from \parencite{zhang2017shufflenet}.}
 	\label{fig:shuffle}
 \end{figure}
 \begin{figure}[!htp]
@@ -277,6 +287,14 @@ ShuffleNet is a neat and fancy architecture specially designed for mobile device
 	\includegraphics[width=4cm]{shufflenet.png}
 	\bicaption[Illustration of ShuffleNet blocks]
 	{重组网络的基本结构}
-	{Illustration of ShuffleNet blocks. Figure borrowed from \cite{zhang2017shufflenet}.}
+	{Illustration of ShuffleNet blocks. Figure borrowed from \parencite{zhang2017shufflenet}.}
 	\label{fig:shufflenet}
 \end{figure}
+
+\subsection{Common Practices in model deep networks}
+
+There are many commonly used practices in those deep networks. We will name a few here to explain them.
+
+With regards to the structures, batch normalization layers are usually used after convolutional layers. Batch normalization can effectively ease the training and improve performance. Global average pooling is usually used after the last convolutional layer, and follows a fully-connected layer to calculate the class scores. In this way, the last full-connected layer need not have to many weights, so the overall speed is improved.
+
+With regards to the optimization algorithm, Stochastic Gradient Descent with momentum is usually used to train these network. Although there has been many more fancy methods like Adam, RMSProp, etc., those optimization methods do not seem to make a difference when training these networks on the large ImageNet dataset.

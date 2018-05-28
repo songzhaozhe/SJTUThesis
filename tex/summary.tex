@@ -4,9 +4,18 @@
 %% Encoding: UTF-8
 %%==================================================
 
-\begin{summary}
+%\chapter{summary}
 
-这里是全文总结内容。
+\chapter{Conclusion}
+
+\chapter{Future work}
+Incremental learning on deep neural networks is a relatively unexplored field, so lots of future work needs to be done. With regards to the algorithm we proposed, when we have enough computation capacity, we would like to test our method on the ImageNet dataset, since this is the most authoritative dataset for image classification. We will also test our algorithm on other computer vision tasks, like object detection and segmentation, and other fields like natural language processing, to prove the generality of our algorithm.
+
+Although surpassing the other paper working on the same task, our algorithm is still not enough for real use, because it still has a gap to the optimal accuracy, after all. Thus the best strategy in commercial use, is still to re-train the model from scratch, to benefit from the best accuracy. We will explore other alternative methods to further improve the performance. 
+
+We think better mathematical understanding of deep neural networks will definitely promote this question. If we can try to find the mathematical properties of a model, it might be easier for us to know how to modify the network to preserve the output accuracies for old classes, while also finding a best weight to fit the new classes.
+
+We would also like to construct better benchmarks for this field. Researchers use a large variety of datasets, and make it difficult to compare between different methods. In multi-task learning, researchers sometimes pick several datasets or tasks, but different papers pick different sequence of tasks. In incremental learning, the dataset varies a lot too. Moreover, the computation budgets, the storage used and the amount of training data used is often not clear in many papers, sometimes making the comparison not fair to some algorithms. Thus, we hope to construct better benchmarks to improve fair comparison in the field of incremental learning.
 
 
-\end{summary}
+%\end{summary}
