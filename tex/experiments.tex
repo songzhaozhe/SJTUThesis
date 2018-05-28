@@ -32,7 +32,7 @@ In the experiments, we will evaluate our method on two representative network st
 
 In the following experiments, we will set the hyper-parameter $\alpha$ as 2. The hyper-parameter $\beta$ is set to 1. The learning rate, if not specified, would be 0.1 in the first half of epochs, and 0.01 in the second half of epochs. The weight decay is set to 0.0001. The momentum for the momentum-based Stochastic Gradient Descent optimizer is set to 0.9. The max epoch parameter to be used after adding each class is set to 2. Note that for $\lambda=1$ in Algorithm \ref{algo:slow}, there it will be equivalent to training for 4 epochs, because one epoch is trained in Step 1 and one epoch is trained in Step 2.
 
-Unless specified, we present the results using Algorithm \ref{algo:slow}, because our experiment machines usually do not have such fast inference speed. A model trained from scratch will typically need 160 epochs. In the experiments, after adding one class, we only used $2~4$ epochs. Thus, our method works extremely fast, using only about $1/80$ of the computation.
+Unless specified, we present the results using Algorithm \ref{algo:slow}, because our experiment machines usually do not have such fast inference speed. A model trained from scratch will typically need 160 epochs. In the experiments, after adding one class, we only used 2 to 4 epochs. Thus, our method works extremely fast, using only about $1/80$ of the computation.
 
 \subsection{Performance on CIFAR-100 Dataset using ResNet32}
 
