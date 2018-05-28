@@ -57,8 +57,7 @@ There is also an interesting trend shown in our curves. During the 10 to 25 clas
 Average values might not truly reflect the knowledge the model has learned. Next, we want to see whether the accuracies of each class are high enough, so that the network really learned knowledge for every class, instead of biasing towards specific classes. Shown in Table \ref{tab:cifar100}, we do not see obvious bias for specific classes using our algorithm. This indicates that our algorithm is able to learn knowledge for every class effectively. Note that the accuracy varies quite a lot for different classes, from $45\%$ to $85\%$. This is because the difficulty of recognizing every class is different.
 \begin{table}[!hpb]
 	\centering
-	\bicaption[The per-class accuracy in CIFAR-100 results]
-	{CIFAR-100结果中各类别准确率}
+	\caption[The per-class accuracy in CIFAR-100 results]
 	{The per-class accuracy in CIFAR-100 results}
 	\label{tab:firstone}
 	\begin{tabular}{@{}lp{10cm}@{}} \toprule
@@ -80,8 +79,7 @@ To show the effectiveness of our algorithm on other deep learning network struct
 In the MobileNetV2 paper, they only ran experiments on ImageNet, and they did not design any concrete model for CIFAR datasets. Thus, we followed their practice and designed the structure ourselves, to let the network be suitable for CIFAR dataset. Our MobileNetV2 structure is shown in Table \ref{tab:mobilenetv2}. We used the same notations as their paper. $t$ refers to the expansion factor applied to the input size. $c$ refers to the output channels of every layer in the same stage. $n$ refers to how many time the basic MobileNetV2 block is repeated in the stage. $s$ refers to the total stride of the stage. $k$ refers to the number of output classes. In CIFAR-10, $k=10$, and in CIFAR-100, $k=100$.
 \begin{table}[!hpb]
 	\centering
-	\bicaption[Our MobileNetV2 model architecture for CIFAR]
-	{用在CIFAR数据集上的MobileNetV2结构}
+	\caption[Our MobileNetV2 model architecture for CIFAR]
 	{Our MobileNetV2 model architecture for CIFAR}
 	\label{tab:mobilenetv2}
 	\begin{tabular}{@{}llllll@{}} \toprule
@@ -101,8 +99,7 @@ In the MobileNetV2 paper, they only ran experiments on ImageNet, and they did no
 \begin{figure}[!htp]
 	\centering
 	\includegraphics[width=12cm]{cifar100_mobile.png}
-	\bicaption[Performance comparison on CIFAR-100 Dataset with MobileNetV2]
-	{用MobileNetV2网络在CIFAR-100数据集上表现}
+	\caption[Performance comparison on CIFAR-100 Dataset with MobileNetV2]
 	{Performance comparison on CIFAR-100 Dataset with MobileNetV2}
 	\label{fig:cifar100_mobile}
 \end{figure}
@@ -113,8 +110,7 @@ Fig.~\ref{fig:cifar100_mobile} shows the accuracy of the model as more and more 
 Next, we also show the accuracies of each class after all 100 classes are added. Shown in Table \ref{tab:cifar100_mobile}, we see that our algorithm can let the model learn to recognize each class. The model do not have bias towards specific classes.
 \begin{table}[!hpb]
 	\centering
-	\bicaption[The per-class accuracy in CIFAR-100 results with MobileNetV2]
-	{CIFAR-100结果中各类别准确率}
+	\caption[The per-class accuracy in CIFAR-100 results with MobileNetV2]
 	{The per-class accuracy in CIFAR-100 results with MobileNetV2}
 	\label{tab:firstone}
 	\begin{tabular}{@{}lp{10cm}@{}} \toprule
@@ -139,24 +135,21 @@ It is worth noting that this time our model performs further worse than the accu
 \begin{figure}[!htp]
 	\centering
 	\includegraphics[width=12cm]{cifar10-resnet.png}
-	\bicaption[Evaluation result on CIFAR-10 Dataset with ResNet32]
-	{用ResNet32网络在CIFAR-10数据集上表现}
+	\caption[Evaluation result on CIFAR-10 Dataset with ResNet32]
 	{Evaluation result on CIFAR-10 Dataset with ResNet32}
 	\label{fig:cifar10-resnet}
 \end{figure}
 \begin{figure}[!htp]
 	\centering
 	\includegraphics[width=12cm]{cifar10-mobilenetv2.png}
-	\bicaption[Evaluation result on CIFAR-10 Dataset with MobileNetV2]
-	{用MobileNetV2网络在CIFAR-10数据集上表现}
+	\caption[Evaluation result on CIFAR-10 Dataset with MobileNetV2]
 	{Evaluation result on CIFAR-10 Dataset with MobileNetV2}
 	\label{fig:cifar10-mobilenetv2}
 \end{figure}
 We also show tested the per-class accuracy in Table \ref{tab:cifar10_resnet} and Table \ref{tab:cifar10_mobilenetv2}, to see that our model learns knowledge for every class.
 \begin{table}[!hpb]
 	\centering
-	\bicaption[The per-class accuracy in CIFAR-10 results for ResNet32]
-	{ResNet32在CIFAR-10结果中各类别准确率}
+	\caption[The per-class accuracy in CIFAR-10 results for ResNet32]
 	{The per-class accuracy in CIFAR-10 results for ResNet32}
 	\label{tab:firstone}
 	\begin{tabular}{@{}lp{10cm}@{}} \toprule
@@ -170,8 +163,7 @@ We also show tested the per-class accuracy in Table \ref{tab:cifar10_resnet} and
 
 \begin{table}[!hpb]
 	\centering
-	\bicaption[The per-class accuracy in CIFAR-10 results for MobileNetV2]
-	{MobileNetV2在CIFAR-10结果中各类别准确率}
+	\caption[The per-class accuracy in CIFAR-10 results for MobileNetV2]
 	{The per-class accuracy in CIFAR-10 results for MobileNetV2}
 	\label{tab:firstone}
 	\begin{tabular}{@{}lp{10cm}@{}} \toprule
@@ -193,8 +185,7 @@ In the following, we tested the results for $\lambda=0.1$ and $\lambda=0.01$. Th
 
 \begin{table}[!hpb]
 	\centering
-	\bicaption[The results of Algorithm \ref{algo:baseline} and \ref{algo:fast} on CIFAR-100 under $\lambda=0.1$]
-	{算法\ref{algo:baseline}和\ref{algo:fast}在CIFAR-100的结果}
+	\caption[The results of Algorithm \ref{algo:baseline} and \ref{algo:fast} on CIFAR-100 under $\lambda=0.1$]
 	{The results of Algorithm \ref{algo:baseline} and \ref{algo:fast} on CIFAR-100 under $\lambda=0.1$. We first trained the model on the first 99 classes from scratch. Then we added the 100-th class and performed the incremental learning algorithm.}
 	\begin{tabular}{@{}lllp{8cm}@{}} \toprule
 		Algorithm & $\lambda$ &Avg. Accuracy&  Final accuracy on each of the 100 classes ($\%$)\\ \midrule
@@ -208,8 +199,7 @@ In the following, we tested the results for $\lambda=0.1$ and $\lambda=0.01$. Th
 \end{table}
 \begin{table}[!hpb]
 	\centering
-	\bicaption[The results of Algorithm \ref{algo:baseline} and \ref{algo:fast} on CIFAR-100 under $\lambda=0.01$]
-	{算法\ref{algo:baseline}和\ref{algo:fast}在CIFAR-100的结果}
+	\caption[The results of Algorithm \ref{algo:baseline} and \ref{algo:fast} on CIFAR-100 under $\lambda=0.01$]
 	{The results of Algorithm \ref{algo:baseline} and \ref{algo:fast} on CIFAR-100 under $\lambda=0.01$. We first trained the model on the first 99 classes from scratch. Then we added the 100-th class and performed the incremental learning algorithm.}
 	\begin{tabular}{@{}lllp{8cm}@{}} \toprule
 		Algorithm & $\lambda$ &Average Accuracy&  Final accuracy on each of the 100 classes ($\%$)\\ \midrule

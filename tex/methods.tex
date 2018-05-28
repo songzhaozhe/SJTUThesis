@@ -24,8 +24,7 @@ Correspondingly, to keep the deep convolutional neural network $\Phi(x_i; \mathb
 \begin{figure}[!htp]
 	\centering
 	\includegraphics[width=8cm]{newclass.png}
-	\bicaption[Illustration of the final linear layer tranformation for adding a new class]
-	{增加类别时全连接层变化示意图}
+	\caption[Illustration of the final linear layer tranformation for adding a new class]
 	{Illustration of the final fully-connected layer tranformation for adding a new class. This figure assumes the case from 2 classes to 3 classes. The blue circles represent the feature map from the last layer. The green circles represent the class scores for the old two classes, and the red circle is the newly added class score output. The lines indicate weights, and dashed lines represent new weights to be added for the new class. A softmax layer follows this fully-connected layer.}
 	\label{fig:newclass}
 \end{figure}

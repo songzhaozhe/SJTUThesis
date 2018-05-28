@@ -12,16 +12,14 @@ In many real world applications, data is collected incrementally. For example, t
 \begin{figure}[!htp]
 	\centering
 	\includegraphics[width=12cm]{arm.jpg}
-	\bicaption[Example of a robotic arm for autonomous logistics center]
-	{可用于物流系统的机械臂示意图}
+	\caption[Example of a robotic arm for autonomous logistics center]
 	{Example of a robotic arm for autonomous logistics center}
 	\label{fig:arm}
 \end{figure}
 \begin{figure}[!htp]
 	\centering
 	\includegraphics[width=12cm]{merchandise.jpg}
-	\bicaption[Example of various types of merchandise]
-	{不同类别的商品示意图}
+	\caption[Example of various types of merchandise]
 	{Example of various types of merchandise}
 	\label{fig:merchandise}
 \end{figure}
@@ -30,8 +28,7 @@ In recent years, deep learning, or to be more concrete, deep convolutional neura
 \begin{figure}[!htp]
 	\centering
 	\includegraphics[width=12cm]{classincremental.png}
-	\bicaption[Illustration of class-incremental learning]
-	{类别增量学习的示意图}
+	\caption[Illustration of class-incremental learning]
 	{Illustration of class-incremental learning}
 	\label{fig:classincremental}
 \end{figure}
@@ -97,12 +94,11 @@ There are two hard negative mining methods commonly use. The first algorithm is 
 
 The second way is applied for non SVM models. It usually starts with a set of positive examples and a randomly sampled set of negative examples. As the model learns, it gradually prioritize the sampling of harder examples, which means the examples that the model predicts poorly. This kind if method is the method we will refer to in our algorithm. However, it is worth noting that the kind of method is rather empirical and does not have any convergence guarantees. Most people are using this technique because it behaves empirically well, so do us.
 
-For example, Shrivastava\cite{shrivastava2016training} proposed to incorporate an online hard negative mining component into Fast-RCNN, and gained several significant advantages. First, it greatly and consistently improved the mean average precision. Second, it removes the need for Faster-RCNN to use many heuristics and hyper-parameters. Hard negative mining made the overall algorithm simpler to tune. The pipeline they proposed can be shown in Fig.~\ref{fig:ohnm}.
+For example, Shrivastava\cite{shrivastava2016training} proposed to incorporate an online hard negative mining component into Fast-RCNN, and gained several significant advantages. First, it greatly and consistently improved the mean average precision. Second, it removes the need for Faster-RCNN to use many heuristics and hyper-parameters. Hard negative mining made the overall algorithm simpler to tune. The pipeline they proposed can be shown in Fig.~\ref{fig:ohnm}. They used the online hard negative mining component, to prioritize selecting the background samples to be trained for the classifier. In this way, the model will not be distracted by easy examples. The easy examples actually nearly do not provide any information useful to the model, so excluding the easy examples saves lots of computation.
 \begin{figure}[!htp]
 	\centering
 	\includegraphics[width=10cm]{ohnm.png}
-	\bicaption[Illustration of online hard negative mining used in Fast-RCNN]
-	{在Fast-RCNN运用困难负样本学习的示意图}
+	\caption[Illustration of online hard negative mining used in Fast-RCNN]
 	{Illustration of online hard negative mining\cite{shrivastava2016training} used in Fast-RCNN. Figure borrowed from \parencite{shrivastava2016training}.}
 	\label{fig:ohnm}
 \end{figure}
@@ -147,8 +143,7 @@ It is also called the hinge loss. The total loss would be the sum of the loss fr
 \begin{figure}[!htp]
 	\centering
 	\includegraphics[width=10cm]{svm.png}
-	\bicaption[An example of SVM classifier]
-	{SVM分类例子例子}
+	\caption[An example of SVM classifier]
 	{An example of SVM classifier}
 	\label{fig:svm}
 \end{figure}
@@ -169,8 +164,7 @@ It is often claimed that the area of Neural Networks was originally inspired by 
 \begin{figure}[!htp]
 	\centering
 	\includegraphics[width=7cm]{singleneuron.png}
-	\bicaption[An illustration of a single neuron]
-	{单个神经元示意图}
+	\caption[An illustration of a single neuron]
 	{An illustration of a single neuron}
 	\label{fig:singleneuron}
 \end{figure}
@@ -178,8 +172,7 @@ Based on the single neuron, we are able to stack many of them to form a multi-la
 \begin{figure}[!htp]
 	\centering
 	\includegraphics[width=9cm]{nn.png}
-	\bicaption[Illustration of Neural Network]
-	{多层神经网络示意图}
+	\caption[Illustration of Neural Network]
 	{An example of multi-layer neural network. Figure borrowed from \parencite{lecun2015deep}.}
 	\label{fig:nn}
 \end{figure}
@@ -187,16 +180,14 @@ This paper will be mainly using convolutional neural networks for image recognit
 \begin{figure}[!htp]
 	\centering
 	\includegraphics[width=8cm]{convolve.png}
-	\bicaption[Illustration of Convolutional Layer]
-	{卷积层示意图}
+	\caption[Illustration of Convolutional Layer]
 	{Illustration of Convolutional Layer}
 	\label{fig:convolve}
 \end{figure}
 \begin{figure}[!htp]
 	\centering
 	\includegraphics[width=8cm]{pooling.png}
-	\bicaption[Illustration of Pooling Layer]
-	{池化层示意图}
+	\caption[Illustration of Pooling Layer]
 	{Illustration of Pooling Layer}
 	\label{fig:pooling}
 \end{figure}
@@ -208,8 +199,7 @@ Deep residual networks\cite{he2016deep}(ResNet) are proposed by Kaiming He in 20
 \begin{figure}[!htp]
 	\centering
 	\includegraphics[width=8cm]{resnet.png}
-	\bicaption[Illustration of Residual Blocks]
-	{残差结构示意图}
+	\caption[Illustration of Residual Blocks]
 	{Illustration of Residual Blocks. Figure borrowed from \parencite{he2016deep}.}
 	\label{fig:resnet}
 \end{figure}
@@ -227,8 +217,7 @@ Deep residual networks brought a storm in the field of machine learning. Althoug
 \begin{figure}[!htp]
 	\centering
 	\includegraphics[width=4cm]{resnetv2.png}
-	\bicaption[Illustration of Pre-activation Residual Blocks]
-	{预激活残差结构示意图}
+	\caption[Illustration of Pre-activation Residual Blocks]
 	{Illustration of Pre-activation Residual Blocks. Figure borrowed from \parencite{he2016identity}.}
 	\label{fig:resnetv2}
 \end{figure}
@@ -240,8 +229,7 @@ However, later comments reveal that ResNet V2 actually does not have such signif
 \begin{figure}[!htp]
 	\centering
 	\includegraphics[width=16cm,height=3cm]{densenet.png}
-	\bicaption[Illustration of DenseNet]
-	{密集链接网络示意图}
+	\caption[Illustration of DenseNet]
 	{Illustration of DenseNet. Figure borrowed from \parencite{huang2017densely}.}
 	\label{fig:densenet}
 \end{figure}
@@ -263,8 +251,7 @@ ResNext is a state-of-the-art convolutional network in 2017\cite{xie2017aggregat
 \begin{figure}[!htp]
 	\centering
 	\includegraphics[width=10cm]{resnext.png}
-	\bicaption[Illustration of ResNeXt blocks]
-	{聚合变换残差网络示意图}
+	\caption[Illustration of ResNeXt blocks]
 	{Illustration of ResNeXt blocks. Figure borrowed from \parencite{xie2017aggregated}.}
 	\label{fig:resnext}
 \end{figure}
@@ -277,16 +264,14 @@ ShuffleNet is a neat and fancy architecture specially designed for mobile device
 \begin{figure}[!htp]
 	\centering
 	\includegraphics[width=4cm]{shuffle.png}
-	\bicaption[Illustration of shuffle operation in ShuffleNets]
-	{重组网络中的重组操作示意图}
+	\caption[Illustration of shuffle operation in ShuffleNets]
 	{Illustration of shuffle operation in ShuffleNet. Figure borrowed from \parencite{zhang2017shufflenet}.}
 	\label{fig:shuffle}
 \end{figure}
 \begin{figure}[!htp]
 	\centering
 	\includegraphics[width=4cm]{shufflenet.png}
-	\bicaption[Illustration of ShuffleNet blocks]
-	{重组网络的基本结构}
+	\caption[Illustration of ShuffleNet blocks]
 	{Illustration of ShuffleNet blocks. Figure borrowed from \parencite{zhang2017shufflenet}.}
 	\label{fig:shufflenet}
 \end{figure}
