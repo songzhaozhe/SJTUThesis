@@ -2,7 +2,7 @@
 \chapter{Method}
 In this section, we will describe the concrete methods proposed in this paper. Since we did experiments mainly in image classification datasets, we will illustrate our method mainly by the example of image classification. However, readers should note that our method can be easily extended to other machine learning problems like object detection and segmentation.
 
-First, we will introduce the transformation we introduced to the final fully connected layer of the convolutional neural network to handle the case when a new class is added. To the best of our knowledge, we are the first to introduce this transformation. Based on this, we first introduce some baseline methods to perform class incremental learning that we compared to in the experiments. Then, we introduced our algorithm based on hard negative mining in detail.
+First, we will introduce the transformation we apply to the final fully connected layer of the convolutional neural network to handle the case when a new class is added. To the best of our knowledge, we are the first to apply this transformation. Based on this, we first introduce some baseline methods to perform class incremental learning that we compared to in the experiments. Then, we introduced our algorithm based on hard negative mining in detail.
 
 \section{Network Transformation for Increasing a Class}
 
@@ -58,7 +58,7 @@ After this transformation, the output of the final fully connected layer $f(\mat
 
 \section{A Straightforward Method}
 
-Utilizing the transformation method introduced in the previous section, we are ready to develop methods to train the newly added parameters, as well as continue training the trained parameters of the network. Following the common practice of training deep neural networks, we will use Stochastic Gradient Descent\cite{he2016deep} (SGD) with momentum\cite{sutskever2013importance} as the default optimization algorithm to train the network.
+Utilizing the transformation method introduced in the previous section, we are ready to develop methods to train the newly added parameters, as well as continue training the trained parameters of the network. One baseline is to fix the old parameters and only train the newly added parameters in the final layer. However, this baseline algorithm performs so poorly that we do not mention in our experiments. Because the features are only trained on the first available classes, the network cannot learn better features later. We are going to discuss another baseline algorithm that makes more sense. Following the common practice of training deep neural networks, we will use Stochastic Gradient Descent\cite{he2016deep} (SGD) with momentum\cite{sutskever2013importance} as the default optimization algorithm to train the network. 
 
 Let us first define the accuracy upper bound, which is the accuracy when the parameters $\mathbf{W}$ of deep convolutional network $\Phi(\mathbf{x_i}; \mathbf{W})$ is trained from scratch using the training set $\mathbb{X}\cup \hat{\mathbb{X}}$. It is clear that to obtain this upper bound, lots of training time would be needed. Since all data is used to train the network from scratch, the network will be able to learn more globally optimal and discriminative features to distinguish all $N+1$ class. The time and computation needed to obtain this accuracy upper bound would also be the upper bound of the cost of time and computation. Here, since more computation leads to longer time, we will use the terms computation and time interchangably. Because since it is impossible for other methods to improve the accuracy, the other methods with longer training time will have no meaning of existence compared to this method. The aim of our algorithm, would be to find methods that lie inside the computation upper bound, while maintaining a relatively high accuracy compared to the accuracy upper bound.
 
@@ -99,7 +99,7 @@ We modify Equation \ref{sgdrule} into the following:
 \begin{align}
 \left\{
 \begin{aligned}
-\upsilon_{t+1} &= m\upsilon_t + (1-m)\left( \eta\beta\frac{1}{p} g_i + \eta w_c \mathbf{W}_t \right)&, &   y_i \in \{1...N\}\\
+\upsilon_{t+1} &= m\upsilon_t + (1-m)\left( \eta\beta\frac{1}{\lambda} g_i + \eta w_c \mathbf{W}_t \right)&, &   y_i \in \{1...N\}\\
 \upsilon_{t+1} &= m\upsilon_t + (1-m)\left( \eta g_i + \eta w_c \mathbf{W}_t \right)&, &   y_i = N+1\\
 \mathbf{W}_{t+1} &= \mathbf{W}_{t} - \upsilon_{t+1}
 \end{aligned}
@@ -108,7 +108,7 @@ We modify Equation \ref{sgdrule} into the following:
 \end{align}
 where $y_i$ denote the ground truth label for the sample.
 
-Shown in Equation \ref{sgdrule2}, we multiplied $g_i$ with two coefficients. The coefficient $\frac{1}{p}$, comes from the sampled subset proportion factor $\lambda$, to re-weight the gradients, so that the proportion of every class are re-weighted to original proportion of the whole dataset. However, in our experiments, we found that simply re-weighting to the original proportion is not enough, perhaps because there is more noise coming from samples of classes $1...N$ because relatively fewer samples are used. Therefore, we introduced the hyper-parameter $\beta$, to further adjust the weights.
+Shown in Equation \ref{sgdrule2}, we multiplied $g_i$ with two coefficients. The coefficient $\frac{1}{\lambda}$, comes from the sampled subset proportion factor $\lambda$, to re-weight the gradients, so that the proportion of every class are re-weighted to original proportion of the whole dataset. However, in our experiments, we found that simply re-weighting to the original proportion is not enough, perhaps because there is more noise coming from samples of classes $1...N$ because relatively fewer samples are used. Therefore, we introduced the hyper-parameter $\beta$, to further adjust the weights.
 
 Let us analyze the computation needed in this baseline method, to better understand its speed. In every iteration, we train the deep neural network using $\lambda|\mathbb{X}| + |\hat{\mathbb{X}}|$ images. The computation needed divided by the computation of one entire epoch is formalized as Equation \ref{eq:baseline}. Because $|\hat{\mathbb{X}}|$ is very small compared to $|\mathbb{X}|$, we can omit it approximately.
 
@@ -152,13 +152,12 @@ Under such circumstances, we design our algorithm as the following steps in Algo
 \label{algo:fast}
 	\begin{algorithmic}
 		\For{$i = 0 \to MAX\_EPOCH$} 
-		\State \textbf{Step 1:} Do one round of inference on the old training set $\mathbb{X}$, and record the model's confidence score on the ground truth class. In the meantime, maintain a priority queue \textit{q}, with a maximum size of $\alpha \lambda |\mathbb{X}|$. The priority queue \textit{q} stores the $\alpha \lambda |\mathbb{X}|$ worst performing images. $\alpha$ is a hyper-parameter larger than $1$.
-		\State \textbf{Step 2:} Randomly sample $\lambda|\mathbb{X}|$ images from the priority queue \textit{q}. We denote the sampled set of images as $\mathbf{X}$. 
+		\State \textbf{Step 1:} Do one round of inference on the old training set $\mathbb{X}$, and record the model's confidence score on the ground truth class. In the meantime, maintain a priority queue \textit{q} for every class, with a maximum total size of $\alpha \lambda |\mathbb{X}|$. The priority queue \textit{q} stores the $\alpha \lambda |\mathbb{X}|$ worst performing images. $\alpha$ is a hyper-parameter larger than $1$.
+		\State \textbf{Step 2:} Randomly sample $\lambda|\mathbb{X}|$ images evenly from every class from the priority queue \textit{q}. We denote the sampled set of images as $\mathbf{X}$. 
 		\State \textbf{Step 3:} Use the combined training set $\mathbf{X} \cup \hat{\mathbb{X}}$ to train the network for an epoch using our modified version of Stochastic Gradient Descent, following Equation \ref{sgdrule2}. By one epoch, we mean that each image $x_i \in \mathbf{X} \cup \hat{\mathbb{X}}$ is used and used exactly once to train the network.
 		\EndFor
 	\end{algorithmic}
 \end{algorithm}
-Due to our empirical analysis, to achieve better results, we added several hyper-parameters in this algorithm, such as $\alpha$ and $\beta$. 
 
 In Step 1, since inference is very fast, the time can be neglected. In Step 2 and Step 3, we train the deep neural network using $\lambda|\mathbb{X}| + |\hat{\mathbb{X}}|$ images. We can compare the data used in Step 2 and Step 3 to the entire dataset as
 $\frac{\lambda|\mathbb{X}| + |\hat{\mathbb{X}}|}{|\mathbb{X}| + |\hat{\mathbb{X}}|}$. Therefore, in every iteration, the computation needed divided by the computation of one entire epoch is formalized as Equation \ref{eq:slow}.
@@ -174,17 +173,15 @@ Thus, the computation needed in this algorithm in every iteration is also nearly
 
 In many cases, we do not have such fast inference speed as illustrated in the previous section. For example, the toolkit TensorRT might degrade performance, and might not be available for all platforms. Moreover, we have to spend time optimizing the model's inference speed, before we can benefit from the fast inference speed. So usually, although inference speed is still much faster than training speed, the inference time spent on going through the whole training set is not bearable.
 
-Under such case, we can no longer follow Step 1 in Algorithm \ref{algo:slow}, because it does not update the model at all, so the time cost would be too much. Alternatively, we can do a simple modification to Step 1. Instead of freezing the model and test on all old training data $\mathbb{X}$, we train the model on $\mathbb{X}\cup \hat{\mathbb{X}}$ in order not to waste time on testing. In this way, Step 1 is modified so that in this step the model gets trained, and in the mean time we collect the images that the model do not perform well in the priority queue \textit{q}. This modification actually involves an approximation. It is based on the assumption that the relative hardness of images does not change much as the model updates its parameter in the new version of Step 1. Fortunately, shown in the experiments, this modification does work well.
-
-The new algorithm can be summarized in Algorithm \ref{algo:slow}.
+Under such case, we can no longer follow Step 1 in Algorithm \ref{algo:slow}, because it does not update the model at all, so the time cost would be too much. Alternatively, we can do a simple modification to Step 1. Instead of freezing the model and test on all old training data $\mathbb{X}$, we train the model on $\mathbb{X}\cup \hat{\mathbb{X}}$ in order not to waste time on testing. In this way, Step 1 is modified so that in this step the model gets trained, and in the mean time we collect the images that the model do not perform well in the priority queue \textit{q}. This modification actually involves an approximation. It is based on the assumption that the relative hardness of images does not change much as the model updates its parameter in the new version of Step 1. Fortunately, shown in the experiments, this modification does work well. The new algorithm can be summarized in Algorithm \ref{algo:slow}.
 
 \begin{algorithm}
 	\caption{Class-incremental learning based on Hard Mining for slow inference speed platforms}
 	\label{algo:slow}
 	\begin{algorithmic}
 		\For{$i = 0 \to MAX\_EPOCH$} 
-		\State \textbf{Step 1:} Do one round of training on the entire mixed training set $\mathbb{X}\cup \hat{\mathbb{X}}$, and record the model's confidence score on the ground truth class. In the meantime, maintain a priority queue \textit{q}, with a maximum size of $\alpha \lambda |\mathbb{X}|$. The priority queue \textit{q} stores the $\alpha \lambda |\mathbb{X}|$ worst performing images belonging to the old dataset $\mathbb{X}$.
-		\State \textbf{Step 2:} Randomly sample $\lambda|\mathbb{X}|$ images from the priority queue \textit{q}. We denote the sampled set of images as $\mathbf{X}$. 
+		\State \textbf{Step 1:} Do one round of training on the entire mixed training set $\mathbb{X}\cup \hat{\mathbb{X}}$, and record the model's confidence score on the ground truth class. In the meantime, maintain a priority queue \textit{q} for each class, with a maximum total size of $\alpha \lambda |\mathbb{X}|$. The priority queue \textit{q} stores the $\alpha \lambda |\mathbb{X}|$ worst performing images belonging to the old dataset $\mathbb{X}$.
+		\State \textbf{Step 2:} Randomly sample $\lambda|\mathbb{X}|$ images evenly for every class from the priority queue \textit{q}. We denote the sampled set of images as $\mathbf{X}$. 
 		\State \textbf{Step 3:} Use the combined training set $\mathbf{X} \cup \hat{\mathbb{X}}$ to train the network for an epoch using our modified version of Stochastic Gradient Descent, following Equation \ref{sgdrule2}.
 		\EndFor
 	\end{algorithmic}

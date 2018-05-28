@@ -6,16 +6,19 @@
 
 %\chapter{summary}
 
-\chapter{Conclusion}
+\chapter{Conclusion and future work}
 
-\chapter{Future work}
-Incremental learning on deep neural networks is a relatively unexplored field, so lots of future work needs to be done. With regards to the algorithm we proposed, when we have enough computation capacity, we would like to test our method on the ImageNet dataset, since this is the most authoritative dataset for image classification. We will also test our algorithm on other computer vision tasks, like object detection and segmentation, and other fields like natural language processing, to prove the generality of our algorithm.
+In this paper, we proposed an algorithm for class-incremental learning, by utilizing the hard negative mining techniques previously often used in object detection tasks. We conducted experiments on the image classification datasets CIFAR-10 and CIFAR-100, and proved the effectiveness of our method by thorough experiments. In CIFAR-100, our algorithm saves $40\times$ time compared with re-training from scratch when a new class of data are added, with only about $2\%$ average accuracy loss. Our method enables the model to learn knowledge on the new class very quickly, while maintaining the accuracy on the old classes. The model learns better features to correctly classify more objects over time.
 
-Although surpassing the other paper working on the same task, our algorithm is still not enough for real use, because it still has a gap to the optimal accuracy, after all. Thus the best strategy in commercial use, is still to re-train the model from scratch, to benefit from the best accuracy. We will explore other alternative methods to further improve the performance. 
+Incremental learning on deep neural networks is a relatively unexplored field, so lots of future work needs to be done. 
 
-We think better mathematical understanding of deep neural networks will definitely promote this question. If we can try to find the mathematical properties of a model, it might be easier for us to know how to modify the network to preserve the output accuracies for old classes, while also finding a best weight to fit the new classes.
+First, with regards to the algorithm we proposed, when we have enough computation capacity, we would like to test our method on the ImageNet dataset, since this is the most authoritative dataset for image classification. We will also test our algorithm on other computer vision tasks, like object detection and segmentation, and other fields like natural language processing, to prove the generality of our algorithm.
 
-We would also like to construct better benchmarks for this field. Researchers use a large variety of datasets, and make it difficult to compare between different methods. In multi-task learning, researchers sometimes pick several datasets or tasks, but different papers pick different sequence of tasks. In incremental learning, the dataset varies a lot too. Moreover, the computation budgets, the storage used and the amount of training data used is often not clear in many papers, sometimes making the comparison not fair to some algorithms. Thus, we hope to construct better benchmarks to improve fair comparison in the field of incremental learning.
+Second, although surpassing the other paper working on the same task, our algorithm is still not enough for real use, because it still has a gap to the optimal accuracy, after all. Thus the best strategy in commercial use, is still to re-train the model from scratch, to benefit from the best accuracy. We will explore other alternative methods to further improve the performance. 
+
+Third, we think better mathematical understanding of deep neural networks will definitely promote this question. If we can try to find the mathematical properties of a model, it might be easier for us to know how to modify the network to preserve the output accuracies for old classes, while also finding a best weight to fit the new classes.
+
+Finally, we would also like to construct better benchmarks for this field. Researchers use a large variety of datasets, and make it difficult to compare between different methods. In multi-task learning, researchers sometimes pick several datasets or tasks, but different papers pick different sequence of tasks. In incremental learning, the dataset varies a lot too. Moreover, the computation budgets, the storage used and the amount of training data used is often not clear in many papers, sometimes making the comparison not fair to some algorithms. Thus, we hope to construct better benchmarks to improve fair comparison in the field of incremental learning.
 
 
 %\end{summary}

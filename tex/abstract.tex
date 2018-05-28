@@ -5,15 +5,16 @@
 
 \begin{abstract}
 
-上海交通大学是我国历史最悠久的高等学府之一，是教育部直属、教育部与上海市共
+在深度学习系统中，数据往往是一步步地采集和增加的。在深度学习领域，一个重要而困难的问题是开发出一套能随着数据的增加而不断提升自己知识的系统。在以往的文献中，这个问题通常被称作增量学习。这样的系统，需要不断地快速地在已有的模型中融合进去新的知识，而不是每次增加了新数据都重新把内部的深度神经网络重新训练一遍，否则开销会很大。在这个工作中，我们利用在物体检测领域经常使用的困难负样本挖掘的方法，提出了一套针对类别不断增加时的增量学习算法。在每次新的类别到来的时候，我们的算法的主循环可以大致分解为以下两步：1）用所数据数据继续训练深度神经网络，并且记录下每个旧类别对神经网络来说最困难的一个图片集合。2）在最困难的图片集合中采样，用它们和新类别的数据再次训练当前的深度神经网络。在第一步中，神经网络模型可以对真实的数据分布进行学习。在第二步中，因为有大量新样本比例，模型被迫快速地学习出新样本的特征，同时又不忘记旧类别中最困难的那些样本，如此往复。我们使用几个典型的深度学习网络结构在图像分类数据集CIFAR-10和CIFAR-100上进行了充分的实验证明我们算法的有效性。我们的方法不仅让模型能快速学习出关于新样本的知识，还能对旧样本维持一个很高的准确率。我们用实验说明我们方法可以始终维持一个较高的平均准确率，而其他底线方法或其他论文中的策略都会让模型很快失败。在CIFAR-100数据集上，我们的算法相比重新训练网络能节省40倍的时间，而仅有$2\%$左右的准确率损失。我们的实验也表明我们的模却是确实可以逐渐学习出越来越好的特征来识别逐渐增长的类别。
 
-\keywords{\large 上海交大 \quad 饮水思源 \quad 爱国荣校}
+
+\keywords{\large 深度学习 \quad 增量学习 \quad 困难负样本挖掘 \quad 图像分类}
 \end{abstract}
 
 \begin{englishabstract}
 
-An imperial .
+In deep learning systems, data is usually collected incrementally. A major and tough problem in the field of deep learning is the development of systems that learns incrementally over time from a stream of available data. This problem is typically called incremental learning in literature. Such systems should continuously incorporate new knowledge in a quick manner, without having to re-train the inherent deep neural network every time from scratch. In this work, we proposed an algorithm for class-incremental learning systems, by utilizing hard negative mining techniques that were popular in recent object detection pipelines. Upon the addition of a new class, our main algorithm can be broken down into two steps that are iterated for several times: 1) Further train the deep neural network with all data, and record the hardest examples from every learned class. 2) Sample the hardest images that the model has already learned, and use them, together with the new class of data, to further train the neural network. In the first step, the model learns the data in a true distribution. In the second step, since the majority are new examples, the model is forced to learn features quickly for the new class, but also not forgetting the hardest old examples. We conducted thorough experiments on the image classification datasets CIFAR-10 and CIFAR-100 using representative deep learning structures, and proved the effectiveness of our method. Our method not only enables the model to learn knowledge on the new class very quickly, but is also capable of maintaining high accuracy on the old classes. Our algorithm keeps a high average accuracy our time, while baseline strategies or strategies from other papers fail quickly. In CIFAR-100, our algorithm saves $40\times$ time compared to re-training from scratch when a new class of training images are added, with only about $2\%$ average accuracy loss. Experiments also indicate that our model indeed gradually learns better features to correctly classify more objects. 
 
-\englishkeywords{\large SJTU, master thesis, XeTeX/LaTeX template}
+\englishkeywords{\large deep learning, incremental learning, hard negative mining, image classification}
 \end{englishabstract}
 

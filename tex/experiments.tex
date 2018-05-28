@@ -28,7 +28,7 @@ In this paper, we follow the evaluation protocol for class-incremental learning 
 
 \section{Experimental Setup}
 
-In the experiments, we will evaluate our method on two representative network structures: ResNet and ShuffleNet. ResNet is the typical architecture in deep convolutional networks, while ShuffleNet is a typical network for deep learning in mobile devices with limited computation budget. By showing that these two network exhibits similar trends, we prove the robustness of our method on different kinds of deep learning network structures. 
+In the experiments, we will evaluate our method on two representative network structures: ResNet and MobileNetV2. ResNet is the typical architecture in deep convolutional networks, while MobileNetV2 is a typical network for deep learning in mobile devices with limited computation budget. By showing that these two network exhibits similar trends, we prove the robustness of our method on different kinds of deep learning network structures. 
 
 In the following experiments, we will set the hyper-parameter $\alpha$ as 2. The hyper-parameter $\beta$ is set to 1. The learning rate, if not specified, would be 0.1 in the first half of epochs, and 0.01 in the second half of epochs. The weight decay is set to 0.0001. The momentum for the momentum-based Stochastic Gradient Descent optimizer is set to 0.9. The max epoch parameter to be used after adding each class is set to 2. Note that for $\lambda=1$ in Algorithm \ref{algo:slow}, there it will be equivalent to training for 4 epochs, because one epoch is trained in Step 1 and one epoch is trained in Step 2.
 
@@ -44,7 +44,7 @@ We first test the performance using ResNet. Since ICaRL used ResNet32 as their f
 	\bicaption[Performance comparison on CIFAR-100 Dataset]
 	{CIFAR-100数据集上表现对比}
 	{Performance comparison on CIFAR-100 Dataset}
-	\label{fig:cifar100}从
+	\label{fig:cifar100}
 \end{figure}
 
 
@@ -184,8 +184,8 @@ We also show tested the per-class accuracy in Table \ref{tab:cifar10_resnet} and
 		\label{tab:cifar10_mobilenetv2}
 	\end{tabular}
 \end{table}
-\subsection{Under negligible inference speed}
-We also tested our Algorithm \ref{algo:fast} under negligible inference speed. We used ResNet32 to evaluate. Since time and computational resource is limited, we are unable plot the whole curve. As an alternative, we first train the model using the first 99 classes from scratch. Then, we add the 100-th class and perform our incremental learning algorithm. We will compare the average accuracy for 100 classes, as well as per-class accuracy to evaluate our algorithm.
+\subsection{Performance under negligible inference speed}
+We also tested our Algorithm \ref{algo:fast} under negligible inference speed. We used the same ResNet32 structure with previous sections to evaluate. Since time and computational resource is limited, we are unable plot the whole curve. As an alternative, we first train the model using the first 99 classes from scratch. Then, we add the 100-th class and perform our incremental learning algorithm. We will compare the average accuracy for 100 classes, as well as per-class accuracy to evaluate our algorithm.
 
 We compared our algorithm with the baseline algorithm Algorithm \ref{algo:baseline}. For all tests, we used a constant learning rate of $0.01$. The max epoch parameter is set to 4. However, we should note that, since the time of Step 1 can be neglected, the time consumption is much more smaller. 
 
